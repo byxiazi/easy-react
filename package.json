@@ -1,0 +1,66 @@
+{
+  "name": "easy-react",
+  "version": "0.1.0",
+  "description": "Awesome project with zero-config for react development",
+  "scripts": {
+    "lint": "tslint  --project tsconfig.json -t codeFrame 'packages/*/src/**/*.ts' 'packages/*/__tests__/**/*.ts'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-cli": "rimraf packages/cli/lib && tsc --project packages/cli/tsconfig.json",
+    "precommit": "lint-staged",
+    "commit": "git-cz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byxiazi/easy-react.git"
+  },
+  "keywords": [
+    "cli",
+    "react"
+  ],
+  "author": "xiaohua",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/byxiazi/easy-react/issues"
+  },
+  "homepage": "https://github.com/byxiazi/easy-react#readme",
+  "lint-staged": {
+    "packages/*/{src,__tests__}/**/*.ts": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "@types/fs-extra": "^9.0.1",
+    "@types/inquirer": "^6.5.0",
+    "@types/node": "^14.0.1",
+    "@types/validate-npm-package-name": "^3.0.0",
+    "babel-eslint": "^10.1.0",
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "^3.2.0",
+    "eslint": "^7.1.0",
+    "husky": "^4.2.5",
+    "lerna": "^3.18.3",
+    "lint-staged": "^10.2.4",
+    "prettier": "^2.0.5",
+    "tslint": "^6.1.2",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-config-standard": "^9.0.0",
+    "typescript": "^3.9.2"
+  }
+}
