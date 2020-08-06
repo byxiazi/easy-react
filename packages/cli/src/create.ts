@@ -5,7 +5,7 @@ import chalk from 'chalk'
 import validateProjectName from 'validate-npm-package-name'
 import { IObj } from './index'
 import CreateReactApp from './CreateReactApp'
-import { error, exit, mergeOptions, clearConsole, copyFiles } from './utils'
+import { error, exit, clearConsole, copyFiles } from './utils'
 
 async function create(projectName: string, options: IObj<string>) {
   if (!projectName) {
