@@ -15,7 +15,9 @@ commander_1.default
 });
 commander_1.default.parse(process.argv);
 function camelize(str) {
-    return str.replace(/-(\w)/g, function (_, c) { return c ? c.toUpperCase() : ''; });
+    return str.replace(/-(\w)/g, function (_, c) {
+        return c ? c.toUpperCase() : '';
+    });
 }
 function cleanArgs(cmd) {
     var args = {};

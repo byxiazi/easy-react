@@ -16,6 +16,17 @@ export default class CreateReactApp extends FileTpl {
   }
 
   init = () => {
+    ;[
+      '.vscode',
+      'public',
+      'src/common',
+      'src/features/components',
+      'src/features/common-rc',
+      'src/images',
+      'src/styles',
+    ].forEach((item) => {
+      this.generator.mkdirs(path.join(this.targetDir, item))
+    })
     this.copyTemplates(
       [
         'index.html',
@@ -31,26 +42,15 @@ export default class CreateReactApp extends FileTpl {
         '.prettierignore',
         '.prettierrc',
         'README.md',
+        'settings.json',
       ],
       path.resolve(__dirname, '..', 'templates'),
       this.targetDir,
       {
         'index.html': 'public/index.html',
+        'settings.json': '.vscode/settings.json',
       }
     )
-
-    ;[
-      'config',
-      'public',
-      'scripts',
-      'src/common',
-      'src/features/components',
-      'src/features/common-rc',
-      'src/images',
-      'src/styles',
-    ].forEach((item) => {
-      this.generator.mkdirs(path.join(this.targetDir, item))
-    })
   }
 
   copyTemplates = (
@@ -70,12 +70,12 @@ export default class CreateReactApp extends FileTpl {
     this.generator.copyFiles(srcFiles, destFiles)
   }
 
-  createStore() {
-    this.generator.writeFiles(path.join(this.targetDir, 'src/common'), {
-      'config-store.ts': this.storeConfig(),
-      'root-reducer.ts': this.rootReducer(),
-    })
-  }
+  // createStore() {
+  //   this.generator.writeFiles(path.join(this.targetDir, 'src/common'), {
+  //     'config-store.ts': this.storeConfig(),
+  //     'root-reducer.ts': this.rootReducer(),
+  //   })
+  // }
 
   createPages = () => {
     const pagesDir = path.join(this.targetDir, 'src/features')
@@ -83,25 +83,25 @@ export default class CreateReactApp extends FileTpl {
       this.generator.writeFiles(path.join(pagesDir, item.toLowerCase()), {
         'index.tsx': this.componentTpl(item),
       })
-      this.generator.writeFiles(
-        path.join(pagesDir, item.toLowerCase(), 'redux'),
-        {
-          'reducers.ts': this.reducerTpl(),
-          'actions.ts': '',
-        }
-      )
+      // this.generator.writeFiles(
+      //   path.join(pagesDir, item.toLowerCase(), 'redux'),
+      //   {
+      //     'reducers.ts': this.reducerTpl(),
+      //     'actions.ts': '',
+      //   }
+      // )
     })
   }
 
-  app = () => {
-    this.generator.writeFiles(path.join(this.targetDir, 'src/.easy'), {
-      ['index.tsx']: this.entry(),
-    })
-  }
+  // app = () => {
+  //   this.generator.writeFiles(path.join(this.targetDir, 'src/.easy'), {
+  //     ['index.tsx']: this.entry(),
+  //   })
+  // }
 
   create() {
-    this.app()
+    // this.app()
     this.createPages()
-    this.createStore()
+    // this.createStore()
   }
 }

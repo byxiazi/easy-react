@@ -24,12 +24,31 @@ var CreateReactApp = /** @class */ (function (_super) {
     function CreateReactApp(name, targetDir) {
         var _this = _super.call(this) || this;
         _this.init = function () {
-            _this.copyTemplates(['index.html', 'package.json', 'tsconfig.json', 'tslint.json', 'babel.config.json', 'postcss.config.js',
-                'stylelint.config.js', '.editorconfig', '.gitignore', '.prettierignore', '.prettierrc', 'README.md'], path_1.default.resolve(__dirname, '..', 'templates'), _this.targetDir, {
-                'index.html': 'public/index.html'
+            _this.copyTemplates([
+                'index.html',
+                'package.json',
+                'tsconfig.json',
+                'tslint.json',
+                'babel.config.js',
+                'easy.config.js',
+                'stylelint.config.js',
+                'typings.d.ts',
+                '.editorconfig',
+                '.gitignore',
+                '.prettierignore',
+                '.prettierrc',
+                'README.md',
+            ], path_1.default.resolve(__dirname, '..', 'templates'), _this.targetDir, {
+                'index.html': 'public/index.html',
             });
-            ['config', 'public', 'scripts', 'src/common', 'src/features/components',
-                'src/features/common-rc', 'src/images', 'src/styles'].forEach(function (item) {
+            [
+                'public',
+                'src/common',
+                'src/features/components',
+                'src/features/common-rc',
+                'src/images',
+                'src/styles',
+            ].forEach(function (item) {
                 _this.generator.mkdirs(path_1.default.join(_this.targetDir, item));
             });
         };
@@ -42,23 +61,26 @@ var CreateReactApp = /** @class */ (function (_super) {
             });
             _this.generator.copyFiles(srcFiles, destFiles);
         };
+        // createStore() {
+        //   this.generator.writeFiles(path.join(this.targetDir, 'src/common'), {
+        //     'config-store.ts': this.storeConfig(),
+        //     'root-reducer.ts': this.rootReducer(),
+        //   })
+        // }
         _this.createPages = function () {
             var pagesDir = path_1.default.join(_this.targetDir, 'src/features');
             ['Home', 'Login'].forEach(function (item) {
                 _this.generator.writeFiles(path_1.default.join(pagesDir, item.toLowerCase()), {
-                    'index.tsx': _this.componentTpl(item)
+                    'index.tsx': _this.componentTpl(item),
                 });
-                _this.generator.writeFiles(path_1.default.join(pagesDir, item.toLowerCase(), 'redux'), {
-                    'reducers.ts': _this.reducerTpl(),
-                    'actions.ts': '',
-                });
+                // this.generator.writeFiles(
+                //   path.join(pagesDir, item.toLowerCase(), 'redux'),
+                //   {
+                //     'reducers.ts': this.reducerTpl(),
+                //     'actions.ts': '',
+                //   }
+                // )
             });
-        };
-        _this.app = function () {
-            var _a;
-            _this.generator.writeFiles(path_1.default.join(_this.targetDir, 'src/.easy'), (_a = {},
-                _a['index.tsx'] = _this.entry(),
-                _a));
         };
         _this.name = name;
         _this.targetDir = targetDir;
@@ -66,15 +88,15 @@ var CreateReactApp = /** @class */ (function (_super) {
         _this.init();
         return _this;
     }
-    CreateReactApp.prototype.createStore = function () {
-        this.generator.writeFiles(path_1.default.join(this.targetDir, 'common'), {
-            'config-store.ts': this.storeConfig(),
-            'root-reducer.ts': this.rootReducer()
-        });
-    };
+    // app = () => {
+    //   this.generator.writeFiles(path.join(this.targetDir, 'src/.easy'), {
+    //     ['index.tsx']: this.entry(),
+    //   })
+    // }
     CreateReactApp.prototype.create = function () {
+        // this.app()
         this.createPages();
-        this.createStore();
+        // this.createStore()
     };
     return CreateReactApp;
 }(FileTpl_1.default));

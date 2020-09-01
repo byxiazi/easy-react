@@ -2,9 +2,12 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-module.exports = function createDevConfig (options={}) {
+module.exports = function createDevConfig(options) {
   const projectRoot = process.cwd()
-  const createBaseConfig  = require('./create-base-config')
+  const createBaseConfig = require('./create-base-config')
+  const {
+    chainWebpack,
+  } = options
   const config = createBaseConfig(options)
 
   config.mode('development')
@@ -24,15 +27,23 @@ module.exports = function createDevConfig (options={}) {
   config.devServer
     .port(5000)
     .hot(true)
-    .historyApiFallback({
-      disableDotRule: true,
-    })
-    .watchOptions( {
+    .watchOptions({
       ignored: /node_modules/,
       poll: 1000,
     })
     .contentBase(path.join(projectRoot, 'public'))
+    .before(function (app) {
+      const mock = require('../mock/index')
+      mock(app)
+    })
+    .historyApiFallback({
+      disableDotRule: true,
+    })
     .stats('errors-only')
+
+  if (typeof chainWebpack === 'function') {
+    chainWebpack(config)
+  }
 
   return config
 }

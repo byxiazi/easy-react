@@ -2,27 +2,31 @@ const path = require('path')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
-module.exports = function createBaseConfig (options) {
+module.exports = function createBaseConfig(options) {
   const Config = require('webpack-chain')
   const config = new Config()
 
   const projectRoot = process.cwd()
+  const {
+    publicPath = '/',
+  } = options
 
   config
     .context(__dirname)
     .entry('index')
-      .add(path.join(projectRoot, './src/index.tsx'))
+      .add(path.join(projectRoot, './.easy/index.tsx'))
       .end()
     .output
       .path(path.join(projectRoot, 'dist'))
-      .filename('[name]_[hash:8].js')
+    .publicPath(publicPath)
+    .filename('[name]_[hash:8].js')
 
   config.resolve
     .alias
       .set('@', path.join(projectRoot, './src'))
       .end()
     .extensions
-      .merge(['.tsx', '.ts', '.mjs', '.js', '.json'])
+    .merge(['.tsx', '.ts', '.mjs', '.js', '.json'])
 
   config.module
     .rule('ts')

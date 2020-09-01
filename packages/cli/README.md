@@ -1,11 +1,9 @@
-# `@easy-react/cli`
+# `@react-mvc/cli`
 
 > TODO: description
 
 ## Usage
 
 ```
-const cli = require('@easy-react/cli');
-
 // TODO: DEMONSTRATE API
 ```

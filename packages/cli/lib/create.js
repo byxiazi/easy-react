@@ -1,10 +1,9 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -63,12 +62,14 @@ function create(projectName, options) {
                     result = validate_npm_package_name_1.default(name);
                     if (!result.validForNewPackages) {
                         utils_1.error(chalk_1.default.red("Invalid project name: \"" + name + "\""));
-                        result.errors && result.errors.forEach(function (err) {
-                            utils_1.error(chalk_1.default.red.dim('Error: ' + err));
-                        });
-                        result.warnings && result.warnings.forEach(function (warn) {
-                            utils_1.error(chalk_1.default.red.dim('Warning: ' + warn));
-                        });
+                        result.errors &&
+                            result.errors.forEach(function (err) {
+                                utils_1.error(chalk_1.default.red.dim('Error: ' + err));
+                            });
+                        result.warnings &&
+                            result.warnings.forEach(function (warn) {
+                                utils_1.error(chalk_1.default.red.dim('Warning: ' + warn));
+                            });
                         utils_1.exit(1);
                     }
                     if (!fs_extra_1.default.existsSync(targetDir)) return [3 /*break*/, 8];
@@ -84,8 +85,8 @@ function create(projectName, options) {
                             {
                                 name: 'ok',
                                 type: 'confirm',
-                                message: "Generate project in current directory?"
-                            }
+                                message: "Generate project in current directory?",
+                            },
                         ])];
                 case 3:
                     ok = (_a.sent()).ok;
@@ -100,9 +101,9 @@ function create(projectName, options) {
                             message: "Target directory " + chalk_1.default.cyan(targetDir) + " already exists. Pick an action:",
                             choices: [
                                 { name: 'Overwrite', value: 'overwrite' },
-                                { name: 'Cancel', value: false }
-                            ]
-                        }
+                                { name: 'Cancel', value: false },
+                            ],
+                        },
                     ])];
                 case 5:
                     action = (_a.sent()).action;

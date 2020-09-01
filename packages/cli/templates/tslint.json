@@ -4,6 +4,7 @@
     "quotemark": [true, "single", "jsx-double"]
   },
   "extends": [
+    "tslint-react",
     "tslint-config-standard",
     "tslint-config-prettier"
   ]

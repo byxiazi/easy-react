@@ -1,5 +1,5 @@
 {
-  "name": "@easy-react/cli",
+  "name": "@react-mvc/cli",
   "version": "0.1.0",
   "description": "> TODO: description",
   "author": "xiaohua <minerxh@163.com>",
@@ -16,10 +16,11 @@
     "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "rimraf ./lib && tsc"
   },
   "bin": {
-    "easy-react": "./bin/index.js"
+    "react-mvc-cli": "./bin/index.js"
   },
   "dependencies": {
     "chalk": "^4.0.0",
@@ -29,5 +30,8 @@
     "inquirer": "^7.1.0",
     "readline": "^1.3.0",
     "validate-npm-package-name": "^3.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2"
   }
 }

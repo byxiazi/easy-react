@@ -5,8 +5,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "precommit": "tsc --noEmit && lint-staged",
     "commit": "git-cz",
-    "start": "node scripts/start.js",
-    "build": "webpack --config ./config/webpack.prod.js"
+    "start": "react-mvc-builder dev",
+    "build": "react-mvc-builder build"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": [
@@ -32,12 +32,8 @@
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-redux": "^7.2.0",
     "react-router-config": "^5.1.1",
-    "react-router-dom": "^5.2.0",
-    "redux": "^4.0.5",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
+    "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^9.8.0",
@@ -67,6 +63,7 @@
     "stylelint-declaration-block-no-ignored-properties": "^2.3.0",
     "stylelint-order": "^4.1.0",
     "tslint": "^6.1.2",
+    "tslint-react": "^5.0.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
     "typescript": "^3.9.2"

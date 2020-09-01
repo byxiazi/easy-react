@@ -1,11 +1,12 @@
-import Home from '@/features/home/index'
-import Login from '@/features/login'
-
 export default {
-  routes: [
-    {
-      path: '/', exact: true,  component: Home,
+  routes: [{
+      path: '/',
+      exact: true,
+      component: '@/features/home/index',
     },
-    {path: '/login', component: Login}
+    {
+      path: '/login',
+      component: '@/features/login'
+    }
   ]
 }

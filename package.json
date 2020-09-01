@@ -1,11 +1,10 @@
 {
-  "name": "easy-react",
+  "name": "react-mvcjs",
   "version": "0.1.0",
   "description": "Awesome project with zero-config for react development",
   "scripts": {
     "lint": "tslint  -t codeFrame 'packages/*/src/**/*.ts' 'packages/*/__tests__/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-cli": "rimraf packages/cli/lib && tsc --project packages/cli/tsconfig.json",
     "precommit": "lint-staged",
     "commit": "git-cz"
   },
@@ -56,9 +55,9 @@
     "eslint": "^7.1.0",
     "husky": "^4.2.5",
     "lerna": "^3.18.3",
-    "rimraf": "^3.0.2",
     "lint-staged": "^10.2.4",
     "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
     "tslint": "^6.1.2",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",

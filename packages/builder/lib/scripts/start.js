@@ -6,58 +6,65 @@ const openBrowser = require('react-dev-utils/openBrowser')
 const {
   choosePort,
   prepareUrls
- } = require('react-dev-utils/WebpackDevServerUtils')
+} = require('react-dev-utils/WebpackDevServerUtils')
 const createDevConfig = require('../config/create-dev-config')
 
-const config = createDevConfig().toConfig()
-const serverConfig = config.devServer
-delete config.devServer
-
-const DEFAULT_PORT = serverConfig.port || 3000
+// const appPath = process.cwd()
 const HOST = process.env.HOST || '0.0.0.0'
 const isInteractive = process.stdout.isTTY
-const appPath = process.cwd()
 
-module.exports = function () {
-  const { checkBrowsers } = require('react-dev-utils/browsersHelper')
+module.exports = function (config, emitter) {
+  const {
+    publicPath
+  } = config
+  const options = {
+    publicPath
+  }
 
-  checkBrowsers(appPath, isInteractive)
-  .then(() => {
-    return choosePort(HOST, DEFAULT_PORT)
-  })
-  .then(port => {
-    if (port == null) {
-      return
-    }
+  const devConfig = createDevConfig(options).toConfig()
+  const devServerConfig = devConfig.devServer
+  delete devConfig.devServer
 
-    const protocol = process.env.HTTPS === 'true' ? 'https' : 'http'
-    const urls = prepareUrls(protocol, HOST, port)
-    const compiler = webpack(config)
-    const devServer = new WebpackDevServer(compiler, serverConfig)
+  const DEFAULT_PORT = devServerConfig.port || 3000
 
-    devServer.listen(port, HOST, err => {
-      if (err) {
-        return console.error(chalk.red(err))
+  choosePort(HOST, DEFAULT_PORT)
+    .then(port => {
+      if (port == null) {
+        return
       }
 
-      if (isInteractive) {
-        clearConsole()
-      }
+      const protocol = process.env.HTTPS === 'true' ? 'https' : 'http'
+      const urls = prepareUrls(protocol, HOST, port)
+      const compiler = webpack(devConfig)
+      const devServer = new WebpackDevServer(compiler, devServerConfig)
 
-      console.log(chalk.cyan('Starting the development server...\n'))
-      openBrowser(urls.localUrlForBrowser)
-    });
+      devServer.listen(port, HOST, err => {
+        if (err) {
+          return console.error(chalk.red(err))
+        }
 
-    ['SIGINT', 'SIGTERM'].forEach(function(sig) {
-      process.on(sig, function() {
-        devServer.close()
-        process.exit()
+        if (isInteractive) {
+          clearConsole()
+        }
+
+        console.log(chalk.cyan('Starting the development server...\n'))
+        openBrowser(urls.localUrlForBrowser)
+      });
+
+      ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+        process.on(sig, function () {
+          devServer.close()
+          process.exit()
+        })
       })
+      emitter.removeAllListeners('close')
+      emitter.on('close', () => {
+        devServer.close()
+      })
+    }).catch(err => {
+      if (err && err.message) {
+        console.error(chalk.red(err.message))
+      }
+      process.exit(1)
     })
-  }).catch(err => {
-    if (err && err.message) {
-      console.error(chalk.red(err.message))
-    }
-    process.exit(1)
-  })
 }

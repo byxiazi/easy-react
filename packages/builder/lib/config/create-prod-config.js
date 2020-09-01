@@ -1,13 +1,18 @@
 const path = require('path')
 const cssnano = require('cssnano')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const {
+  CleanWebpackPlugin
+} = require('clean-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 
-module.exports = function createProdConfig (options={}) {
+module.exports = function createProdConfig(options) {
   const projectRoot = process.cwd()
-  const createBaseConfig  = require('./create-base-config')
+  const createBaseConfig = require('./create-base-config')
+  const {
+    chainWebpack,
+  } = options
   const config = createBaseConfig(options)
 
   config.mode('production')
@@ -31,12 +36,12 @@ module.exports = function createProdConfig (options={}) {
         filename: 'index.html',
         template: path.join(projectRoot, 'public/index.html'),
         minify: {
-            html5: true,
-            collapseWhitespace: true,
-            preserveLineBreaks: false,
-            minifyCSS: true,
-            minifyJS: true,
-            removeComments: false
+          html5: true,
+          collapseWhitespace: true,
+          preserveLineBreaks: false,
+          minifyCSS: true,
+          minifyJS: true,
+          removeComments: false
         }
       }])
       .end()
@@ -54,6 +59,10 @@ module.exports = function createProdConfig (options={}) {
     })
 
   config.stats('errors-only')
+
+  if (typeof chainWebpack === 'function') {
+    chainWebpack(config)
+  }
 
   return config
 }
