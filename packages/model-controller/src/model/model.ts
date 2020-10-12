@@ -2,7 +2,7 @@ type subscriber = (state: any) => void
 export type reducer = (oldState: any, payload: any) => any
 
 interface Model {
-  namespaces: string[]
+  // namespaces: string[]
   state: {
     [namespace: string]:
       | {
@@ -25,17 +25,13 @@ interface Model {
 }
 
 const Model: Model = {
-  namespaces: [],
+  // namespaces: [],
   state: {},
   publishers: [],
   register(namespace, initState, reducer) {
-    if (!this.namespaces.includes(namespace)) {
-      // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
-      this.namespaces.push(namespace)
-      this.state[namespace] = {
-        state: initState,
-        reducer,
-      }
+    this.state[namespace] = {
+      state: initState,
+      reducer,
     }
   },
   subscribe(namespace, publishers, callback) {

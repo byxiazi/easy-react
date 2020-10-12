@@ -2,7 +2,7 @@
 **/*.svg
 **/*.ejs
 **/*.html
-packages/builder/lib/config/create-base-config.js
-packages/builder/lib/config/create-dev-config.js
-packages/builder/lib/config/create-prod-config.js
+**/create-base-config.js
+**/create-dev-config.js
+**/create-prod-config.js
 package.json

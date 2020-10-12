@@ -74,9 +74,27 @@ export default function config({
       }
 
       init = () => {
+        this.clearAbandonCache()
         const state = this.getInitState(namespace)
         this.register(namespace, undefined)
         this.dispatch(state)
+      }
+
+      clearAbandonCache = () => {
+        if (cacheOpts) {
+          switch (cacheOpts.cache) {
+            case 'sessionStorage':
+              if (local.getItem(cacheKey)) {
+                local.removeItem(cacheKey)
+              }
+              break
+            case 'localStorage':
+              if (session.getItem(cacheKey)) {
+                session.removeItem(cacheKey)
+              }
+              break
+          }
+        }
       }
 
       getInitState = (ns: string) => {
@@ -91,12 +109,9 @@ export default function config({
           } else if (s && !l) {
             state = s
           } else if (l && !s) {
-            const temp = l
-            if (temp) {
-              const expired = temp.expired
-              if (expired >= Date.now()) {
-                state = temp.value
-              }
+            const expired = l.expired
+            if (expired >= Date.now()) {
+              state = l.value
             }
           }
         } catch (error) {
@@ -120,8 +135,9 @@ export default function config({
         return Model.getState(namespace)
       }
 
-      dispatch = (state: any) => {
-        const newState = Model.dispatch(state, namespace)
+      dispatch = (state: any, action?: string) => {
+        const n = action || namespace
+        const newState = Model.dispatch(state, n)
         if (cacheOpts) {
           switch (cacheOpts.cache) {
             case 'sessionStorage':
@@ -142,27 +158,6 @@ export default function config({
         }
       }
 
-      // cacheState = (state: any) => {
-      //   if (cacheOpts) {
-      //     switch (cacheOpts.cache) {
-      //       case 'sessionStorage':
-      //         session.setItem(cacheKey, state)
-      //         break
-      //       case 'localStorage':
-      //         let expired = 0
-      //         if (typeof cacheOpts.expired === 'number') {
-      //           expired = Date.now() + cacheOpts.expired
-      //         }
-
-      //         local.setItem(cacheKey, {
-      //           value: state,
-      //           expired,
-      //         })
-      //         break
-      //     }
-      //   }
-      // }
-
       componentWillUnmount() {
         Model.unSubscribe(namespace)
       }
@@ -172,7 +167,6 @@ export default function config({
         return (
           <RouterContext.Consumer>
             {(context) => {
-              console.log(context, 'ccc')
               return (
                 <WrapComponent
                   {...this.state}
