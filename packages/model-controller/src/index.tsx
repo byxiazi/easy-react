@@ -13,10 +13,12 @@ export interface CacheOpts {
 
 export interface ModelConfig {
   namespace: string
-  subscribe?: string[]
+  publishers?: string[]
   initState?: any
   reducer?: reducer
   cacheOpts?: CacheOpts
+  clearCache?: boolean
+  reset?: boolean
 }
 
 export interface WrapComponentProps {
@@ -38,12 +40,35 @@ const CACHE_PREFIX = '(@*@)react-mvc/model-cache//'
 
 export default function config({
   namespace,
-  subscribe,
+  publishers,
   initState,
   reducer,
   cacheOpts,
+  clearCache,
+  reset,
 }: ModelConfig) {
   const cacheKey = CACHE_PREFIX + namespace
+
+  function clearLocal() {
+    if (local.getItem(cacheKey) != null) {
+      local.removeItem(cacheKey)
+    }
+  }
+
+  function clearSession() {
+    if (session.getItem(cacheKey) != null) {
+      session.removeItem(cacheKey)
+    }
+  }
+
+  if (clearCache) {
+    clearLocal()
+    clearSession()
+  }
+
+  if (reset) {
+    Model.reset(namespace)
+  }
 
   return (
     WrapComponent:
@@ -56,11 +81,15 @@ export default function config({
     > {
       constructor(props: ControllerProps) {
         super(props)
+        this.state = {}
         this.init()
+      }
+
+      componentDidMount() {
         let subscribed = []
-        if (Array.isArray(subscribe)) {
-          Model.subscribe(namespace, subscribe, this.update)
-          subscribed = subscribe.map((item) => {
+        if (Array.isArray(publishers)) {
+          Model.subscribe(namespace, publishers, this.update)
+          subscribed = publishers.map((item) => {
             let state = Model.getState(item)
             if (state === undefined) {
               state = this.getInitState(item)
@@ -68,9 +97,7 @@ export default function config({
             return state
           })
         }
-        this.state = {
-          subscribed,
-        }
+        this.setState({ subscribed })
       }
 
       init = () => {
@@ -84,14 +111,10 @@ export default function config({
         if (cacheOpts) {
           switch (cacheOpts.cache) {
             case 'sessionStorage':
-              if (local.getItem(cacheKey)) {
-                local.removeItem(cacheKey)
-              }
+              clearLocal()
               break
             case 'localStorage':
-              if (session.getItem(cacheKey)) {
-                session.removeItem(cacheKey)
-              }
+              clearSession()
               break
           }
         }

@@ -2,7 +2,7 @@ type subscriber = (state: any) => void
 export type reducer = (oldState: any, payload: any) => any
 
 interface Model {
-  // namespaces: string[]
+  namespaces: string[]
   state: {
     [namespace: string]:
       | {
@@ -11,7 +11,7 @@ interface Model {
         }
       | undefined
   }
-  publishers: Array<{
+  subs: Array<{
     publishers: string[]
     namespace: string
     callback: subscriber
@@ -22,30 +22,35 @@ interface Model {
   // unregister(namespace: string): void
   dispatch(state: any, action: string): any
   getState(namespace: string): any
+  reset(namespace: string): void
 }
 
 const Model: Model = {
-  // namespaces: [],
+  namespaces: [],
   state: {},
-  publishers: [],
+  subs: [],
   register(namespace, initState, reducer) {
-    this.state[namespace] = {
-      state: initState,
-      reducer,
+    if (!this.namespaces.includes(namespace)) {
+      // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
+      this.namespaces.push(namespace)
+      this.state[namespace] = {
+        state: initState,
+        reducer,
+      }
     }
   },
   subscribe(namespace, publishers, callback) {
-    this.publishers = this.publishers.filter((item) => {
+    this.subs = this.subs.filter((item) => {
       return item.namespace !== namespace
     })
-    this.publishers.push({
+    this.subs.push({
       publishers,
       namespace,
       callback,
     })
   },
   unSubscribe(namespace: string) {
-    this.publishers = this.publishers.filter((item) => {
+    this.subs = this.subs.filter((item) => {
       return item.namespace !== namespace
     })
   },
@@ -58,7 +63,7 @@ const Model: Model = {
       newState = state
     }
     this.state[namespace]!.state = newState
-    this.publishers.forEach((item) => {
+    this.subs.forEach((item) => {
       if (item.publishers.includes(namespace)) {
         const values = item.publishers.map((item) => {
           return this.getState(item)
@@ -70,6 +75,12 @@ const Model: Model = {
   },
   getState(namespace) {
     return this.state[namespace] ? this.state[namespace]!.state : undefined
+  },
+  reset(namespace: string) {
+    this.namespaces = this.namespaces.filter((item) => {
+      return item !== namespace
+    })
+    this.state[namespace] = undefined
   },
 }
 
