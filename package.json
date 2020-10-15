@@ -22,6 +22,10 @@
     "url": "https://github.com/byxiazi/easy-react/issues"
   },
   "homepage": "https://github.com/byxiazi/easy-react#readme",
+  "gitHooks": {
+    "pre-commit": "lint-staged",
+    "commit-msg": "node scripts/verify-commit-msg.js"
+  },
   "lint-staged": {
     "packages/*/{src,__tests__}/**/*.ts": [
       "prettier --write",
@@ -61,6 +65,10 @@
     "tslint": "^6.1.2",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
-    "typescript": "^3.9.2"
+    "typescript": "^3.9.2",
+    "yorkie": "^2.0.0"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0"
   }
 }

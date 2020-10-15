@@ -1,6 +1,7 @@
 import path from 'path'
 import FileTpl from './FileTpl'
 import Generator from './Generator'
+import { gitInit } from './shell'
 import { IObj } from './index'
 
 export default class CreateReactApp extends FileTpl {
@@ -19,6 +20,7 @@ export default class CreateReactApp extends FileTpl {
     ;[
       '.vscode',
       'public',
+      'scripts',
       'src/common',
       'src/features/components',
       'src/features/common-rc',
@@ -43,12 +45,14 @@ export default class CreateReactApp extends FileTpl {
         '.prettierrc',
         'README.md',
         'settings.json',
+        'verify-commit-msg.js',
       ],
       path.resolve(__dirname, '..', 'templates'),
       this.targetDir,
       {
         'index.html': 'public/index.html',
         'settings.json': '.vscode/settings.json',
+        'verify-commit-msg.js': 'scripts/verify-commit-msg.js',
       }
     )
   }
@@ -83,25 +87,15 @@ export default class CreateReactApp extends FileTpl {
       this.generator.writeFiles(path.join(pagesDir, item.toLowerCase()), {
         'index.tsx': this.componentTpl(item),
       })
-      // this.generator.writeFiles(
-      //   path.join(pagesDir, item.toLowerCase(), 'redux'),
-      //   {
-      //     'reducers.ts': this.reducerTpl(),
-      //     'actions.ts': '',
-      //   }
-      // )
     })
   }
 
-  // app = () => {
-  //   this.generator.writeFiles(path.join(this.targetDir, 'src/.easy'), {
-  //     ['index.tsx']: this.entry(),
-  //   })
-  // }
-
   create() {
-    // this.app()
     this.createPages()
-    // this.createStore()
+    this.afterCreated()
+  }
+
+  afterCreated() {
+    gitInit(this.targetDir)
   }
 }

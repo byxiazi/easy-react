@@ -8,7 +8,7 @@ interface Model {
             reducer?: reducer;
         } | undefined;
     };
-    publishers: Array<{
+    subs: Array<{
         publishers: string[];
         namespace: string;
         callback: subscriber;
@@ -18,6 +18,7 @@ interface Model {
     unSubscribe(namespace: string): void;
     dispatch(state: any, action: string): any;
     getState(namespace: string): any;
+    reset(namespace: string): void;
 }
 declare const Model: Model;
 export default Model;

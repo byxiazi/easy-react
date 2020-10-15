@@ -1,7 +1,7 @@
 var Model = {
     namespaces: [],
     state: {},
-    publishers: [],
+    subs: [],
     register: function (namespace, initState, reducer) {
         if (!this.namespaces.includes(namespace)) {
             // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
@@ -13,17 +13,17 @@ var Model = {
         }
     },
     subscribe: function (namespace, publishers, callback) {
-        this.publishers = this.publishers.filter(function (item) {
+        this.subs = this.subs.filter(function (item) {
             return item.namespace !== namespace;
         });
-        this.publishers.push({
+        this.subs.push({
             publishers: publishers,
             namespace: namespace,
             callback: callback,
         });
     },
     unSubscribe: function (namespace) {
-        this.publishers = this.publishers.filter(function (item) {
+        this.subs = this.subs.filter(function (item) {
             return item.namespace !== namespace;
         });
     },
@@ -38,7 +38,7 @@ var Model = {
             newState = state;
         }
         this.state[namespace].state = newState;
-        this.publishers.forEach(function (item) {
+        this.subs.forEach(function (item) {
             if (item.publishers.includes(namespace)) {
                 var values = item.publishers.map(function (item) {
                     return _this.getState(item);
@@ -50,6 +50,12 @@ var Model = {
     },
     getState: function (namespace) {
         return this.state[namespace] ? this.state[namespace].state : undefined;
+    },
+    reset: function (namespace) {
+        this.namespaces = this.namespaces.filter(function (item) {
+            return item !== namespace;
+        });
+        this.state[namespace] = undefined;
     },
 };
 export default Model;

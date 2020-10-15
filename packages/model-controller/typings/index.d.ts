@@ -7,10 +7,12 @@ export interface CacheOpts {
 }
 export interface ModelConfig {
     namespace: string;
-    subscribe?: string[];
+    publishers?: string[];
     initState?: any;
     reducer?: reducer;
     cacheOpts?: CacheOpts;
+    clearCache?: boolean;
+    reset?: boolean;
 }
 export interface WrapComponentProps {
     [key: string]: any;
@@ -24,14 +26,16 @@ export interface ControllerProps {
 interface ControllerState {
     [key: string]: any;
 }
-export default function config({ namespace, subscribe, initState, reducer, cacheOpts, }: ModelConfig): (WrapComponent: React.ComponentClass<WrapComponentProps, any> | React.FunctionComponent<WrapComponentProps>) => {
+export default function config({ namespace, publishers, initState, reducer, cacheOpts, clearCache, reset, }: ModelConfig): (WrapComponent: React.ComponentClass<WrapComponentProps, any> | React.FunctionComponent<WrapComponentProps>) => {
     new (props: ControllerProps): {
+        componentDidMount(): void;
         init: () => void;
+        clearAbandonCache: () => void;
         getInitState: (ns: string) => any;
         register: (ns: string, state: any) => void;
         update: (state: any) => void;
         getState: () => any;
-        dispatch: (state: any) => void;
+        dispatch: (state: any, action?: string | undefined) => void;
         componentWillUnmount(): void;
         render(): JSX.Element;
         context: any;

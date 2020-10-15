@@ -37,17 +37,47 @@ import Model from './model/model';
 import { session, local } from './model/storage';
 var CACHE_PREFIX = '(@*@)react-mvc/model-cache//';
 export default function config(_a) {
-    var namespace = _a.namespace, subscribe = _a.subscribe, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts;
+    var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, clearCache = _a.clearCache, reset = _a.reset;
     var cacheKey = CACHE_PREFIX + namespace;
+    function clearLocal() {
+        if (local.getItem(cacheKey) != null) {
+            local.removeItem(cacheKey);
+        }
+    }
+    function clearSession() {
+        if (session.getItem(cacheKey) != null) {
+            session.removeItem(cacheKey);
+        }
+    }
+    if (clearCache) {
+        clearLocal();
+        clearSession();
+    }
+    if (reset) {
+        Model.reset(namespace);
+    }
     return function (WrapComponent) {
         return /** @class */ (function (_super) {
             __extends(Controller, _super);
             function Controller(props) {
                 var _this = _super.call(this, props) || this;
                 _this.init = function () {
+                    _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
                     _this.register(namespace, undefined);
                     _this.dispatch(state);
+                };
+                _this.clearAbandonCache = function () {
+                    if (cacheOpts) {
+                        switch (cacheOpts.cache) {
+                            case 'sessionStorage':
+                                clearLocal();
+                                break;
+                            case 'localStorage':
+                                clearSession();
+                                break;
+                        }
+                    }
                 };
                 _this.getInitState = function (ns) {
                     var state = ns === namespace ? initState : undefined;
@@ -62,12 +92,9 @@ export default function config(_a) {
                             state = s;
                         }
                         else if (l && !s) {
-                            var temp = l;
-                            if (temp) {
-                                var expired = temp.expired;
-                                if (expired >= Date.now()) {
-                                    state = temp.value;
-                                }
+                            var expired = l.expired;
+                            if (expired >= Date.now()) {
+                                state = l.value;
                             }
                         }
                     }
@@ -87,8 +114,9 @@ export default function config(_a) {
                 _this.getState = function () {
                     return Model.getState(namespace);
                 };
-                _this.dispatch = function (state) {
-                    var newState = Model.dispatch(state, namespace);
+                _this.dispatch = function (state, action) {
+                    var n = action || namespace;
+                    var newState = Model.dispatch(state, n);
                     if (cacheOpts) {
                         switch (cacheOpts.cache) {
                             case 'sessionStorage':
@@ -107,11 +135,16 @@ export default function config(_a) {
                         }
                     }
                 };
+                _this.state = {};
                 _this.init();
+                return _this;
+            }
+            Controller.prototype.componentDidMount = function () {
+                var _this = this;
                 var subscribed = [];
-                if (Array.isArray(subscribe)) {
-                    Model.subscribe(namespace, subscribe, _this.update);
-                    subscribed = subscribe.map(function (item) {
+                if (Array.isArray(publishers)) {
+                    Model.subscribe(namespace, publishers, this.update);
+                    subscribed = publishers.map(function (item) {
                         var state = Model.getState(item);
                         if (state === undefined) {
                             state = _this.getInitState(item);
@@ -119,30 +152,8 @@ export default function config(_a) {
                         return state;
                     });
                 }
-                _this.state = {
-                    subscribed: subscribed,
-                };
-                return _this;
-            }
-            // cacheState = (state: any) => {
-            //   if (cacheOpts) {
-            //     switch (cacheOpts.cache) {
-            //       case 'sessionStorage':
-            //         session.setItem(cacheKey, state)
-            //         break
-            //       case 'localStorage':
-            //         let expired = 0
-            //         if (typeof cacheOpts.expired === 'number') {
-            //           expired = Date.now() + cacheOpts.expired
-            //         }
-            //         local.setItem(cacheKey, {
-            //           value: state,
-            //           expired,
-            //         })
-            //         break
-            //     }
-            //   }
-            // }
+                this.setState({ subscribed: subscribed });
+            };
             Controller.prototype.componentWillUnmount = function () {
                 Model.unSubscribe(namespace);
             };
@@ -150,7 +161,6 @@ export default function config(_a) {
                 var _this = this;
                 var _a = this.props, _ref = _a._ref, rest = __rest(_a, ["_ref"]);
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
-                    console.log(context, 'ccc');
                     return (React.createElement(WrapComponent, __assign({}, _this.state, { dispatch: _this.dispatch, getState: _this.getState, context: context }, rest, { ref: _ref })));
                 }));
             };

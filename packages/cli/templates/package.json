@@ -8,6 +8,10 @@
     "start": "react-mvc-builder dev",
     "build": "react-mvc-builder build"
   },
+  "gitHooks": {
+    "pre-commit": "lint-staged",
+    "commit-msg": "node scripts/verify-commit-msg.js"
+  },
   "lint-staged": {
     "{src,test}/**/*.ts": [
       "prettier --write",
@@ -53,6 +57,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/react-router-config": "^5.0.1",
     "@types/webpack-env": "^1.15.2",
+    "chalk": "^4.1.0",
     "commitizen": "^4.1.2",
     "cz-conventional-changelog": "^3.2.0",
     "husky": "^4.2.5",
@@ -68,7 +73,8 @@
     "tslint-react": "^5.0.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
-    "typescript": "^3.9.2"
+    "typescript": "^3.9.2",
+    "yorkie": "^2.0.0"
   },
   "browserslist": [
     ">1%",

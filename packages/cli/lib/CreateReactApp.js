@@ -19,11 +19,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
 var FileTpl_1 = __importDefault(require("./FileTpl"));
 var Generator_1 = __importDefault(require("./Generator"));
+var shell_1 = require("./shell");
 var CreateReactApp = /** @class */ (function (_super) {
     __extends(CreateReactApp, _super);
     function CreateReactApp(name, targetDir) {
         var _this = _super.call(this) || this;
         _this.init = function () {
+            ;
+            [
+                '.vscode',
+                'public',
+                'scripts',
+                'src/common',
+                'src/features/components',
+                'src/features/common-rc',
+                'src/images',
+                'src/styles',
+            ].forEach(function (item) {
+                _this.generator.mkdirs(path_1.default.join(_this.targetDir, item));
+            });
             _this.copyTemplates([
                 'index.html',
                 'package.json',
@@ -38,18 +52,12 @@ var CreateReactApp = /** @class */ (function (_super) {
                 '.prettierignore',
                 '.prettierrc',
                 'README.md',
+                'settings.json',
+                'verify-commit-msg.js',
             ], path_1.default.resolve(__dirname, '..', 'templates'), _this.targetDir, {
                 'index.html': 'public/index.html',
-            });
-            [
-                'public',
-                'src/common',
-                'src/features/components',
-                'src/features/common-rc',
-                'src/images',
-                'src/styles',
-            ].forEach(function (item) {
-                _this.generator.mkdirs(path_1.default.join(_this.targetDir, item));
+                'settings.json': '.vscode/settings.json',
+                'verify-commit-msg.js': 'scripts/verify-commit-msg.js',
             });
         };
         _this.copyTemplates = function (files, srcDir, destDir, options) {
@@ -73,13 +81,6 @@ var CreateReactApp = /** @class */ (function (_super) {
                 _this.generator.writeFiles(path_1.default.join(pagesDir, item.toLowerCase()), {
                     'index.tsx': _this.componentTpl(item),
                 });
-                // this.generator.writeFiles(
-                //   path.join(pagesDir, item.toLowerCase(), 'redux'),
-                //   {
-                //     'reducers.ts': this.reducerTpl(),
-                //     'actions.ts': '',
-                //   }
-                // )
             });
         };
         _this.name = name;
@@ -88,15 +89,12 @@ var CreateReactApp = /** @class */ (function (_super) {
         _this.init();
         return _this;
     }
-    // app = () => {
-    //   this.generator.writeFiles(path.join(this.targetDir, 'src/.easy'), {
-    //     ['index.tsx']: this.entry(),
-    //   })
-    // }
     CreateReactApp.prototype.create = function () {
-        // this.app()
         this.createPages();
-        // this.createStore()
+        this.afterCreated();
+    };
+    CreateReactApp.prototype.afterCreated = function () {
+        shell_1.gitInit(this.targetDir);
     };
     return CreateReactApp;
 }(FileTpl_1.default));
