@@ -3,7 +3,7 @@
   "scripts": {
     "lint": "tslint  --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "precommit": "tsc --noEmit && lint-staged",
+    "precommit": "lint-staged",
     "commit": "git-cz",
     "start": "react-mvc-builder dev",
     "build": "react-mvc-builder build"
@@ -13,7 +13,8 @@
     "commit-msg": "node scripts/verify-commit-msg.js"
   },
   "lint-staged": {
-    "{src,test}/**/*.ts": [
+    "{src,test}/**/*.{ts,tsx}": [
+      "tsc --noEmit",
       "prettier --write",
       "git add"
     ]
