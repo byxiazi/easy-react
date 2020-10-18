@@ -23,7 +23,6 @@ export default class CreateReactApp extends FileTpl {
       'scripts',
       'src/common',
       'src/features/components',
-      'src/features/common-rc',
       'src/images',
       'src/styles',
     ].forEach((item) => {

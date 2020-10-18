@@ -16,7 +16,12 @@ interface Model {
     namespace: string
     callback: subscriber
   }>
-  register(namespace: string, initState: any, reducer?: reducer): void
+  register(
+    namespace: string,
+    initState: any,
+    dispatch: (state: any, action?: string) => void,
+    reducer?: reducer
+  ): void
   subscribe(namespace: string, publishers: string[], callback: subscriber): void
   unSubscribe(namespace: string): void
   // unregister(namespace: string): void
@@ -29,14 +34,15 @@ const Model: Model = {
   namespaces: [],
   state: {},
   subs: [],
-  register(namespace, initState, reducer) {
+  register(namespace, initState, dispatch, reducer) {
     if (!this.namespaces.includes(namespace)) {
       // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
       this.namespaces.push(namespace)
       this.state[namespace] = {
-        state: initState,
+        state: undefined,
         reducer,
       }
+      dispatch(initState, namespace)
     }
   },
   subscribe(namespace, publishers, callback) {

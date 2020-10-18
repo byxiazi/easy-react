@@ -37,7 +37,7 @@ import Model from './model/model';
 import { session, local } from './model/storage';
 var CACHE_PREFIX = '(@*@)react-mvc/model-cache//';
 export default function config(_a) {
-    var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, clearCache = _a.clearCache, reset = _a.reset;
+    var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, reset = _a.reset;
     var cacheKey = CACHE_PREFIX + namespace;
     function clearLocal() {
         if (local.getItem(cacheKey) != null) {
@@ -49,14 +49,12 @@ export default function config(_a) {
             session.removeItem(cacheKey);
         }
     }
-    if (clearCache) {
+    if (reset) {
         clearLocal();
         clearSession();
-    }
-    if (reset) {
         Model.reset(namespace);
     }
-    return function (WrapComponent) {
+    return function (WrappedComponentProps) {
         return /** @class */ (function (_super) {
             __extends(Controller, _super);
             function Controller(props) {
@@ -64,8 +62,7 @@ export default function config(_a) {
                 _this.init = function () {
                     _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
-                    _this.register(namespace, undefined);
-                    _this.dispatch(state);
+                    _this.register(namespace, state);
                 };
                 _this.clearAbandonCache = function () {
                     if (cacheOpts) {
@@ -104,7 +101,7 @@ export default function config(_a) {
                     return state;
                 };
                 _this.register = function (ns, state) {
-                    Model.register(ns, state, reducer);
+                    Model.register(ns, state, _this.dispatch, reducer);
                 };
                 _this.update = function (state) {
                     _this.setState({
@@ -159,9 +156,10 @@ export default function config(_a) {
             };
             Controller.prototype.render = function () {
                 var _this = this;
-                var _a = this.props, _ref = _a._ref, rest = __rest(_a, ["_ref"]);
+                var _a = this.props, _ref = _a._ref, restProps = __rest(_a, ["_ref"]);
+                var _b = this.state, subscribed = _b.subscribed, restState = __rest(_b, ["subscribed"]);
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
-                    return (React.createElement(WrapComponent, __assign({}, _this.state, { dispatch: _this.dispatch, getState: _this.getState, context: context }, rest, { ref: _ref })));
+                    return (React.createElement(WrappedComponentProps, __assign({}, restState, { subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, context: context }, restProps, { ref: _ref })));
                 }));
             };
             return Controller;

@@ -11,13 +11,13 @@ export interface ModelConfig {
     initState?: any;
     reducer?: reducer;
     cacheOpts?: CacheOpts;
-    clearCache?: boolean;
     reset?: boolean;
 }
-export interface WrapComponentProps {
+export interface WrappedComponentProps {
     [key: string]: any;
     dispatch: (state: any) => void;
     getState: () => any;
+    subscribed: any[];
     context: RouteComponentProps;
 }
 export interface ControllerProps {
@@ -26,7 +26,7 @@ export interface ControllerProps {
 interface ControllerState {
     [key: string]: any;
 }
-export default function config({ namespace, publishers, initState, reducer, cacheOpts, clearCache, reset, }: ModelConfig): (WrapComponent: React.ComponentClass<WrapComponentProps, any> | React.FunctionComponent<WrapComponentProps>) => {
+export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): (WrappedComponentProps: React.ComponentClass<WrappedComponentProps, any> | React.FunctionComponent<WrappedComponentProps>) => {
     new (props: ControllerProps): {
         componentDidMount(): void;
         init: () => void;

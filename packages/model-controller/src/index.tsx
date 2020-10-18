@@ -17,14 +17,14 @@ export interface ModelConfig {
   initState?: any
   reducer?: reducer
   cacheOpts?: CacheOpts
-  clearCache?: boolean
   reset?: boolean
 }
 
-export interface WrapComponentProps {
+export interface WrappedComponentProps {
   [key: string]: any
   dispatch: (state: any) => void
   getState: () => any
+  subscribed: any[]
   context: RouteComponentProps
 }
 
@@ -44,7 +44,6 @@ export default function config({
   initState,
   reducer,
   cacheOpts,
-  clearCache,
   reset,
 }: ModelConfig) {
   const cacheKey = CACHE_PREFIX + namespace
@@ -61,19 +60,16 @@ export default function config({
     }
   }
 
-  if (clearCache) {
+  if (reset) {
     clearLocal()
     clearSession()
-  }
-
-  if (reset) {
     Model.reset(namespace)
   }
 
   return (
-    WrapComponent:
-      | ComponentClass<WrapComponentProps, any>
-      | FunctionComponent<WrapComponentProps>
+    WrappedComponentProps:
+      | ComponentClass<WrappedComponentProps, any>
+      | FunctionComponent<WrappedComponentProps>
   ) => {
     return class Controller extends Component<
       ControllerProps,
@@ -103,8 +99,7 @@ export default function config({
       init = () => {
         this.clearAbandonCache()
         const state = this.getInitState(namespace)
-        this.register(namespace, undefined)
-        this.dispatch(state)
+        this.register(namespace, state)
       }
 
       clearAbandonCache = () => {
@@ -145,7 +140,7 @@ export default function config({
       }
 
       register = (ns: string, state: any) => {
-        Model.register(ns, state, reducer)
+        Model.register(ns, state, this.dispatch, reducer)
       }
 
       update = (state: any) => {
@@ -186,17 +181,19 @@ export default function config({
       }
 
       render() {
-        const { _ref, ...rest } = this.props
+        const { _ref, ...restProps } = this.props
+        const { subscribed, ...restState } = this.state
         return (
           <RouterContext.Consumer>
             {(context) => {
               return (
-                <WrapComponent
-                  {...this.state}
+                <WrappedComponentProps
+                  {...restState}
+                  subscribed={subscribed}
                   dispatch={this.dispatch}
                   getState={this.getState}
                   context={context}
-                  {...rest}
+                  {...restProps}
                   ref={_ref}
                 />
               )
