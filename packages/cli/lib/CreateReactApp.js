@@ -32,7 +32,6 @@ var CreateReactApp = /** @class */ (function (_super) {
                 'scripts',
                 'src/common',
                 'src/features/components',
-                'src/features/common-rc',
                 'src/images',
                 'src/styles',
             ].forEach(function (item) {
