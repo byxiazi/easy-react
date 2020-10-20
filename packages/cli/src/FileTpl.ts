@@ -2,9 +2,9 @@ export default class FileTpl {
   componentTpl(name: string) {
     const c = `
       import React, { Component } from 'react'
-      import controller, { WrapComponentProps } from '@react-mvc/model-controller'
+      import controller, { WrappedComponentProps } from '@react-mvc/model-controller'
 
-      class ${name} extends Component<WrapComponentProps, any> {
+      class ${name} extends Component<WrappedComponentProps, any> {
         render() {
           return (
             <div className="${name.toLowerCase()}" >
