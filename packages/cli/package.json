@@ -1,6 +1,6 @@
 {
   "name": "@react-mvc/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "> TODO: description",
   "author": "xiaohua <minerxh@163.com>",
   "homepage": "",
@@ -9,9 +9,6 @@
     "lib": "lib",
     "test": "__tests__"
   },
-  "files": [
-    "lib"
-  ],
   "publishConfig": {
     "access": "public"
   },
