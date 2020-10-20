@@ -47,7 +47,7 @@ var CreateReactApp = /** @class */ (function (_super) {
                 'stylelint.config.js',
                 'typings.d.ts',
                 '.editorconfig',
-                '.gitignore',
+                '.gitignore.tpl',
                 '.prettierignore',
                 '.prettierrc',
                 'README.md',
@@ -57,6 +57,7 @@ var CreateReactApp = /** @class */ (function (_super) {
                 'index.html': 'public/index.html',
                 'settings.json': '.vscode/settings.json',
                 'verify-commit-msg.js': 'scripts/verify-commit-msg.js',
+                '.gitignore.tpl': '.gitignore',
             });
         };
         _this.copyTemplates = function (files, srcDir, destDir, options) {

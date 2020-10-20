@@ -39,7 +39,7 @@ export default class CreateReactApp extends FileTpl {
         'stylelint.config.js',
         'typings.d.ts',
         '.editorconfig',
-        '.gitignore',
+        '.gitignore.tpl',
         '.prettierignore',
         '.prettierrc',
         'README.md',
@@ -52,6 +52,7 @@ export default class CreateReactApp extends FileTpl {
         'index.html': 'public/index.html',
         'settings.json': '.vscode/settings.json',
         'verify-commit-msg.js': 'scripts/verify-commit-msg.js',
+        '.gitignore.tpl': '.gitignore',
       }
     )
   }
