@@ -6,8 +6,10 @@ const parseRouter = require('./parse')
 module.exports = function (app) {
   const dir = path.join(process.cwd(), 'mock')
   try {
-    const files = readDir(dir)
-    parseRouter(app, dir, files)
+    if (fs.existsSync(dir)) {
+      const files = readDir(dir)
+      parseRouter(app, dir, files)
+    }
   } catch (error) {
     console.error(error)
   }

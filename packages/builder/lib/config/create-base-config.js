@@ -79,6 +79,11 @@ module.exports = function createBaseConfig(options) {
         .end()
       .use('less-loader')
         .loader('less-loader')
+        .options({
+          lessOptions: {
+             javascriptEnabled: true
+          }
+        })
         .end()
       .end()
     .rule('file')
