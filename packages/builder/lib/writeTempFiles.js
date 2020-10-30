@@ -7,55 +7,42 @@ function isPlainObject(obj) {
 
 class Generator {
   constructor(cwd, config) {
-    const {
-      base,
-      history,
-      routes
-    } = config
+    const { base, history, routes, cssEntry } = config
     this.cwd = cwd
     this.base = base || '/'
     this.history = history
     this.routes = routes || []
+    this.cssEntry = cssEntry
   }
 
   reactRouter() {
     let _type = 'browser'
     let _options = {}
     if (this.history && isPlainObject(this.history)) {
-      const {
-        type,
-        options
-      } = this.history
+      const { type, options } = this.history
       _type = type
       _options = isPlainObject(options) ? options : {}
     }
 
-    const {
-      routes,
-      esModules,
-      options
-    } = this.parseRouter(_options)
+    const { routes, esModules, options } = this.parseRouter(_options)
 
     let router = null
     switch (_type) {
       case 'browser':
-        router =
-          `<BrowserRouter {...options} basename="${this.base}">
+        router = `<BrowserRouter {...options} basename="${this.base}">
           {renderRoutes(${routes})}
         </BrowserRouter>`
-        break;
+        break
       case 'hash':
-        router =
-          `<HashRouter {...options} basename="${this.base}">
+        router = `<HashRouter {...options} basename="${this.base}">
           {renderRoutes(${routes})}
         </HashRouter>`
-        break;
+        break
       case 'memory':
-        router =
-          `<MemoryRouter {...options} basename="${this.base}">
+        router = `<MemoryRouter {...options} basename="${this.base}">
           {renderRoutes(${routes})}
         <MemoryRouter>`
-        break;
+        break
     }
 
     return {
@@ -69,7 +56,7 @@ class Generator {
     const esModules = []
 
     function deepParse(list) {
-      list.map(item => {
+      list.map((item) => {
         const relativePath = item.component
         if (!relativePath) return
 
@@ -98,9 +85,11 @@ class Generator {
       if (matchs) {
         let name = matchs[1]
         name = name.replace(/{|}/g, '').trim()
-        esModules.push(getUserConfirmation.replace(/^\s*(import.*?from)(.*)/, (_, b, c) => {
-          return `${b} "${c.trim()}"`
-        }))
+        esModules.push(
+          getUserConfirmation.replace(/^\s*(import.*?from)(.*)/, (_, b, c) => {
+            return `${b} "${c.trim()}"`
+          })
+        )
         options.getUserConfirmation = name
       }
     } else {
@@ -108,30 +97,32 @@ class Generator {
     }
 
     return {
-      routes: JSON.stringify(this.routes).replace(/("component":)"(.*?)"/g, (_, $1, $2) => {
-        return $1 + $2
-      }),
+      routes: JSON.stringify(this.routes).replace(
+        /("component":)"(.*?)"/g,
+        (_, $1, $2) => {
+          return $1 + $2
+        }
+      ),
       esModules,
       options: JSON.stringify(options),
     }
   }
 
-
   entry() {
-    const {
-      router,
-      esModules,
-      options,
-    } = this.reactRouter()
+    const { router, esModules, options } = this.reactRouter()
+    const cssEntry = this.cssEntry
+      ? `import "${this.cssEntry.replace('@', path.resolve(this.cwd, 'src'))}"`
+      : ''
 
     const cnt = `
       /* tslint:disable */
+      // @ts-nocheck
       import React from 'react'
       import ReactDOM from 'react-dom'
       import { BrowserRouter } from 'react-router-dom'
       import { renderRoutes } from 'react-router-config'
       ${esModules.join('\n')}
-
+      ${cssEntry}
 
       function renderApp(app: React.ReactElement) {
         ReactDOM.render(
@@ -141,7 +132,6 @@ class Generator {
       }
 
       const options = ${options}
-
 
       const Root = () => (
         ${router}
@@ -161,11 +151,17 @@ class Generator {
     const dir = path.join(this.cwd, '.easy')
     fs.removeSync(dir)
     fs.ensureDirSync(dir)
-    fs.writeFileSync(path.join(dir, 'index.tsx'), cnt.replace(/^ {6}/gm, '').trim())
-    fs.utimesSync(path.join(dir, 'index.tsx'), (Date.now() - 10 * 1000) / 1000, (Date.now() - 10 * 1000) / 1000)
+    fs.writeFileSync(
+      path.join(dir, 'index.tsx'),
+      cnt.replace(/^ {6}/gm, '').trim()
+    )
+    fs.utimesSync(
+      path.join(dir, 'index.tsx'),
+      (Date.now() - 10 * 1000) / 1000,
+      (Date.now() - 10 * 1000) / 1000
+    )
   }
 }
-
 
 exports.writeTempFiles = function (cwd, config) {
   const g = new Generator(cwd, config)

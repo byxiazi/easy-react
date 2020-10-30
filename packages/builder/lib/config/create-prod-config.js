@@ -6,6 +6,7 @@ const {
 } = require('clean-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = function createProdConfig(options) {
   const projectRoot = process.cwd()
@@ -16,6 +17,24 @@ module.exports = function createProdConfig(options) {
   const config = createBaseConfig(options)
 
   config.mode('production')
+
+  config.module
+    .rule('css')
+      .delete('style-loader')
+      .use('mini-css')
+        .loader(MiniCssExtractPlugin.loader)
+        .before("css-loader")
+        .end()
+      .end()
+
+  config.module
+    .rule('less')
+      .delete('style-loader')
+      .use('mini-css')
+        .loader(MiniCssExtractPlugin.loader)
+        .before("css-loader")
+        .end()
+      .end()
 
   config
     .plugin('clean')
