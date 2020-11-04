@@ -8,7 +8,7 @@ exports.get = function (app, url, value) {
   }
 }
 
-exports.post = function (url, value) {
+exports.post = function (app, url, value) {
   if (typeof value === 'function') {
     app.post(url, value)
   } else {
@@ -18,7 +18,7 @@ exports.post = function (url, value) {
   }
 }
 
-exports.put = function (url, value) {
+exports.put = function (app, url, value) {
   if (typeof value === 'function') {
     app.put(url, value)
   } else {
@@ -28,7 +28,7 @@ exports.put = function (url, value) {
   }
 }
 
-exports.delete = function (url, value) {
+exports.delete = function (app, url, value) {
   if (typeof value === 'function') {
     app.delete(url, value)
   } else {
