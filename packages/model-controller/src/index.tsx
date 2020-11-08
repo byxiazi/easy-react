@@ -1,4 +1,4 @@
-import React, { Component, ComponentClass, FunctionComponent } from 'react'
+import React, { Component, ComponentClass, FunctionComponent, Ref } from 'react'
 import {
   __RouterContext as RouterContext,
   RouteComponentProps,
@@ -21,11 +21,15 @@ export interface ModelConfig {
 }
 
 export interface WrappedComponentProps {
-  [key: string]: any
+  // [key: string]: any
   dispatch: (state: any) => void
   getState: () => any
-  subscribed: any[]
+  subscribed: any[] | undefined
   context: RouteComponentProps
+}
+
+interface WrappedComponentPropsWithRef extends WrappedComponentProps {
+  ref: Ref<any>
 }
 
 export interface ControllerProps {
@@ -37,6 +41,38 @@ interface ControllerState {
 }
 
 const CACHE_PREFIX = '(@*@)react-mvc/model-cache//'
+
+function _getState(ns: string) {
+  let state
+  try {
+    const key = CACHE_PREFIX + ns
+    const s = session.getItem(key)
+    const l = local.getItem(key)
+    if (s && l) {
+      console.warn(`namespace ${ns} used two caching methods, please
+            choose one of "localStorage" and "sessionStorage"`)
+    } else if (s && !l) {
+      state = s
+    } else if (l && !s) {
+      const expired = l.expired
+      if (expired && expired >= Date.now()) {
+        state = l.value
+      }
+    }
+  } catch (error) {
+    //
+  }
+
+  return state
+}
+
+export const getState = (ns: string) => {
+  let state = Model.getState(ns)
+  if (state === undefined) {
+    state = _getState(ns)
+  }
+  return state
+}
 
 export default function config({
   namespace,
@@ -68,7 +104,7 @@ export default function config({
 
   return (
     WrappedComponentProps:
-      | ComponentClass<WrappedComponentProps, any>
+      | ComponentClass<WrappedComponentPropsWithRef, any>
       | FunctionComponent<WrappedComponentProps>
   ) => {
     return class Controller extends Component<
@@ -100,6 +136,7 @@ export default function config({
         this.clearAbandonCache()
         const state = this.getInitState(namespace)
         this.register(namespace, state)
+        this.setCache(Model.getState(namespace))
       }
 
       clearAbandonCache = () => {
@@ -112,35 +149,22 @@ export default function config({
               clearSession()
               break
           }
+        } else {
+          clearLocal()
+          clearSession()
         }
       }
 
       getInitState = (ns: string) => {
-        let state = ns === namespace ? initState : undefined
-        try {
-          const key = CACHE_PREFIX + ns
-          const s = session.getItem(key)
-          const l = local.getItem(key)
-          if (s && l) {
-            console.warn(`namespace ${ns} used two caching methods, please
-            choose one of "localStorage" and "sessionStorage"`)
-          } else if (s && !l) {
-            state = s
-          } else if (l && !s) {
-            const expired = l.expired
-            if (expired >= Date.now()) {
-              state = l.value
-            }
-          }
-        } catch (error) {
-          //
+        let state = _getState(ns)
+        if (state === undefined && ns === namespace) {
+          state = initState
         }
-
-        return state
+        return
       }
 
       register = (ns: string, state: any) => {
-        Model.register(ns, state, this.dispatch, reducer)
+        Model.register(ns, state, reducer)
       }
 
       update = (state: any) => {
@@ -149,17 +173,21 @@ export default function config({
         })
       }
 
-      getState = () => {
-        return Model.getState(namespace)
+      getState = (ns?: string) => {
+        return getState(ns || namespace)
       }
 
       dispatch = (state: any, action?: string) => {
         const n = action || namespace
         const newState = Model.dispatch(state, n)
+        this.setCache(newState)
+      }
+
+      setCache = (state: any) => {
         if (cacheOpts) {
           switch (cacheOpts.cache) {
             case 'sessionStorage':
-              session.setItem(cacheKey, newState)
+              session.setItem(cacheKey, state)
               break
             case 'localStorage':
               let expired = 0
@@ -168,7 +196,7 @@ export default function config({
               }
 
               local.setItem(cacheKey, {
-                value: newState,
+                value: state,
                 expired,
               })
               break
