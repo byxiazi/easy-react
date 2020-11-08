@@ -1,4 +1,4 @@
-import React, { Component, ComponentClass, FunctionComponent, Ref } from 'react'
+import React, { Component, ClassAttributes } from 'react'
 import {
   __RouterContext as RouterContext,
   RouteComponentProps,
@@ -20,16 +20,12 @@ export interface ModelConfig {
   reset?: boolean
 }
 
-export interface WrappedComponentProps {
+export interface WrappedComponentProps extends ClassAttributes<any> {
   // [key: string]: any
   dispatch: (state: any) => void
   getState: () => any
   subscribed: any[] | undefined
   context: RouteComponentProps
-}
-
-interface WrappedComponentPropsWithRef extends WrappedComponentProps {
-  ref: Ref<any>
 }
 
 export interface ControllerProps {
@@ -102,11 +98,7 @@ export default function config({
     Model.reset(namespace)
   }
 
-  return (
-    WrappedComponentProps:
-      | ComponentClass<WrappedComponentPropsWithRef, any>
-      | FunctionComponent<WrappedComponentProps>
-  ) => {
+  return (WrappedComponent: React.ComponentType<WrappedComponentProps>) => {
     return class Controller extends Component<
       ControllerProps,
       ControllerState
@@ -215,7 +207,7 @@ export default function config({
           <RouterContext.Consumer>
             {(context) => {
               return (
-                <WrappedComponentProps
+                <WrappedComponent
                   {...restState}
                   subscribed={subscribed}
                   dispatch={this.dispatch}

@@ -13,7 +13,7 @@ interface Model {
         namespace: string;
         callback: subscriber;
     }>;
-    register(namespace: string, initState: any, dispatch: (state: any, action?: string) => void, reducer?: reducer): void;
+    register(namespace: string, initState: any, reducer?: reducer): void;
     subscribe(namespace: string, publishers: string[], callback: subscriber): void;
     unSubscribe(namespace: string): void;
     dispatch(state: any, action: string): any;

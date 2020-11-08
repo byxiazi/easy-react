@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ClassAttributes } from 'react';
 import { RouteComponentProps } from 'react-router';
 import { reducer } from './model/model';
 export interface CacheOpts {
@@ -13,11 +13,10 @@ export interface ModelConfig {
     cacheOpts?: CacheOpts;
     reset?: boolean;
 }
-export interface WrappedComponentProps {
-    [key: string]: any;
+export interface WrappedComponentProps extends ClassAttributes<any> {
     dispatch: (state: any) => void;
     getState: () => any;
-    subscribed: any[];
+    subscribed: any[] | undefined;
     context: RouteComponentProps;
 }
 export interface ControllerProps {
@@ -26,16 +25,18 @@ export interface ControllerProps {
 interface ControllerState {
     [key: string]: any;
 }
-export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): (WrappedComponentProps: React.ComponentClass<WrappedComponentProps, any> | React.FunctionComponent<WrappedComponentProps>) => {
+export declare const getState: (ns: string) => any;
+export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): (WrappedComponent: React.ComponentType<WrappedComponentProps>) => {
     new (props: ControllerProps): {
         componentDidMount(): void;
         init: () => void;
         clearAbandonCache: () => void;
-        getInitState: (ns: string) => any;
+        getInitState: (ns: string) => void;
         register: (ns: string, state: any) => void;
         update: (state: any) => void;
-        getState: () => any;
+        getState: (ns?: string | undefined) => any;
         dispatch: (state: any, action?: string | undefined) => void;
+        setCache: (state: any) => void;
         componentWillUnmount(): void;
         render(): JSX.Element;
         context: any;

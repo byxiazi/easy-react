@@ -36,6 +36,37 @@ import { __RouterContext as RouterContext, } from 'react-router';
 import Model from './model/model';
 import { session, local } from './model/storage';
 var CACHE_PREFIX = '(@*@)react-mvc/model-cache//';
+function _getState(ns) {
+    var state;
+    try {
+        var key = CACHE_PREFIX + ns;
+        var s = session.getItem(key);
+        var l = local.getItem(key);
+        if (s && l) {
+            console.warn("namespace " + ns + " used two caching methods, please\n            choose one of \"localStorage\" and \"sessionStorage\"");
+        }
+        else if (s && !l) {
+            state = s;
+        }
+        else if (l && !s) {
+            var expired = l.expired;
+            if (expired && expired >= Date.now()) {
+                state = l.value;
+            }
+        }
+    }
+    catch (error) {
+        //
+    }
+    return state;
+}
+export var getState = function (ns) {
+    var state = Model.getState(ns);
+    if (state === undefined) {
+        state = _getState(ns);
+    }
+    return state;
+};
 export default function config(_a) {
     var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, reset = _a.reset;
     var cacheKey = CACHE_PREFIX + namespace;
@@ -54,7 +85,7 @@ export default function config(_a) {
         clearSession();
         Model.reset(namespace);
     }
-    return function (WrappedComponentProps) {
+    return function (WrappedComponent) {
         return /** @class */ (function (_super) {
             __extends(Controller, _super);
             function Controller(props) {
@@ -63,6 +94,7 @@ export default function config(_a) {
                     _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
                     _this.register(namespace, state);
+                    _this.setCache(Model.getState(namespace));
                 };
                 _this.clearAbandonCache = function () {
                     if (cacheOpts) {
@@ -75,49 +107,39 @@ export default function config(_a) {
                                 break;
                         }
                     }
+                    else {
+                        clearLocal();
+                        clearSession();
+                    }
                 };
                 _this.getInitState = function (ns) {
-                    var state = ns === namespace ? initState : undefined;
-                    try {
-                        var key = CACHE_PREFIX + ns;
-                        var s = session.getItem(key);
-                        var l = local.getItem(key);
-                        if (s && l) {
-                            console.warn("namespace " + ns + " used two caching methods, please\n            choose one of \"localStorage\" and \"sessionStorage\"");
-                        }
-                        else if (s && !l) {
-                            state = s;
-                        }
-                        else if (l && !s) {
-                            var expired = l.expired;
-                            if (expired >= Date.now()) {
-                                state = l.value;
-                            }
-                        }
+                    var state = _getState(ns);
+                    if (state === undefined && ns === namespace) {
+                        state = initState;
                     }
-                    catch (error) {
-                        //
-                    }
-                    return state;
+                    return;
                 };
                 _this.register = function (ns, state) {
-                    Model.register(ns, state, _this.dispatch, reducer);
+                    Model.register(ns, state, reducer);
                 };
                 _this.update = function (state) {
                     _this.setState({
                         subscribed: state,
                     });
                 };
-                _this.getState = function () {
-                    return Model.getState(namespace);
+                _this.getState = function (ns) {
+                    return getState(ns || namespace);
                 };
                 _this.dispatch = function (state, action) {
                     var n = action || namespace;
                     var newState = Model.dispatch(state, n);
+                    _this.setCache(newState);
+                };
+                _this.setCache = function (state) {
                     if (cacheOpts) {
                         switch (cacheOpts.cache) {
                             case 'sessionStorage':
-                                session.setItem(cacheKey, newState);
+                                session.setItem(cacheKey, state);
                                 break;
                             case 'localStorage':
                                 var expired = 0;
@@ -125,7 +147,7 @@ export default function config(_a) {
                                     expired = Date.now() + cacheOpts.expired;
                                 }
                                 local.setItem(cacheKey, {
-                                    value: newState,
+                                    value: state,
                                     expired: expired,
                                 });
                                 break;
@@ -159,7 +181,7 @@ export default function config(_a) {
                 var _a = this.props, _ref = _a._ref, restProps = __rest(_a, ["_ref"]);
                 var _b = this.state, subscribed = _b.subscribed, restState = __rest(_b, ["subscribed"]);
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
-                    return (React.createElement(WrappedComponentProps, __assign({}, restState, { subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, context: context }, restProps, { ref: _ref })));
+                    return (React.createElement(WrappedComponent, __assign({}, restState, { subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, context: context }, restProps, { ref: _ref })));
                 }));
             };
             return Controller;

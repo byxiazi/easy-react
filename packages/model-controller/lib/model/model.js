@@ -2,7 +2,7 @@ var Model = {
     namespaces: [],
     state: {},
     subs: [],
-    register: function (namespace, initState, dispatch, reducer) {
+    register: function (namespace, initState, reducer) {
         if (!this.namespaces.includes(namespace)) {
             // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
             this.namespaces.push(namespace);
@@ -10,7 +10,7 @@ var Model = {
                 state: undefined,
                 reducer: reducer,
             };
-            dispatch(initState, namespace);
+            this.dispatch(initState, namespace);
         }
     },
     subscribe: function (namespace, publishers, callback) {
