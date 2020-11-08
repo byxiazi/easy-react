@@ -51,7 +51,7 @@ function _getState(ns: string) {
       state = s
     } else if (l && !s) {
       const expired = l.expired
-      if (expired && expired >= Date.now()) {
+      if (!expired || expired >= Date.now()) {
         state = l.value
       }
     }
@@ -152,7 +152,7 @@ export default function config({
         if (state === undefined && ns === namespace) {
           state = initState
         }
-        return
+        return state
       }
 
       register = (ns: string, state: any) => {

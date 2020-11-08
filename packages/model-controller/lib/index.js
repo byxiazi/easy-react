@@ -50,7 +50,7 @@ function _getState(ns) {
         }
         else if (l && !s) {
             var expired = l.expired;
-            if (expired && expired >= Date.now()) {
+            if (!expired || expired >= Date.now()) {
                 state = l.value;
             }
         }
@@ -117,7 +117,7 @@ export default function config(_a) {
                     if (state === undefined && ns === namespace) {
                         state = initState;
                     }
-                    return;
+                    return state;
                 };
                 _this.register = function (ns, state) {
                     Model.register(ns, state, reducer);

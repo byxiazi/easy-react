@@ -31,7 +31,7 @@ export default function config({ namespace, publishers, initState, reducer, cach
         componentDidMount(): void;
         init: () => void;
         clearAbandonCache: () => void;
-        getInitState: (ns: string) => void;
+        getInitState: (ns: string) => any;
         register: (ns: string, state: any) => void;
         update: (state: any) => void;
         getState: (ns?: string | undefined) => any;
