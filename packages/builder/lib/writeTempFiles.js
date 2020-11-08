@@ -7,12 +7,13 @@ function isPlainObject(obj) {
 
 class Generator {
   constructor(cwd, config) {
-    const { base, history, routes, cssEntry } = config
+    const { base, history, routes, cssEntry, layout } = config
     this.cwd = cwd
     this.base = base || '/'
     this.history = history
     this.routes = routes || []
     this.cssEntry = cssEntry
+    this.layout = layout
   }
 
   reactRouter() {
@@ -25,23 +26,39 @@ class Generator {
     }
 
     const { routes, esModules, options } = this.parseRouter(_options)
+    const layoutCompName = this.layout && this.pathToComponentName(this.layout)
+    const layoutESImport = layoutCompName
+      ? `import ${layoutCompName} from "${this.layout}"`
+      : ''
+    esModules.push(layoutESImport)
 
     let router = null
+    const renderRoutes = layoutCompName
+      ? `<${layoutCompName}WithRouter>
+            {renderRoutes(${routes})}
+          </${layoutCompName}WithRouter>`
+      : `{renderRoutes(${routes})}`
+    const _layoutCompName = layoutCompName
+      ? `const ${layoutCompName}WithRouter = withRouter(${layoutCompName})`
+      : ''
     switch (_type) {
       case 'browser':
-        router = `<BrowserRouter {...options} basename="${this.base}">
-          {renderRoutes(${routes})}
-        </BrowserRouter>`
+        router = `${_layoutCompName}
+        return (<BrowserRouter {...options} basename="${this.base}">
+          ${renderRoutes}
+        </BrowserRouter>)`
         break
       case 'hash':
-        router = `<HashRouter {...options} basename="${this.base}">
-          {renderRoutes(${routes})}
-        </HashRouter>`
+        router = `${_layoutCompName}
+        return (<HashRouter {...options} basename="${this.base}">
+          ${renderRoutes}
+        </HashRouter>)`
         break
       case 'memory':
-        router = `<MemoryRouter {...options} basename="${this.base}">
-          {renderRoutes(${routes})}
-        <MemoryRouter>`
+        router = `${_layoutCompName}
+        return (<MemoryRouter {...options} basename="${this.base}">
+          ${renderRoutes}
+        <MemoryRouter>)`
         break
     }
 
@@ -55,17 +72,12 @@ class Generator {
   parseRouter(options) {
     const esModules = []
 
-    function deepParse(list) {
+    const deepParse = (list) => {
       list.map((item) => {
         const relativePath = item.component
         if (!relativePath) return
 
-        const ext = path.extname(relativePath)
-        const filename = path.basename(relativePath, ext)
-        const component = filename.replace(/.?/, ($1) => {
-          if (!$1) return ''
-          return $1.toUpperCase()
-        })
+        const component = this.pathToComponentName(relativePath)
         item.component = component
         const esImport = `import ${component} from "${relativePath}"`
         esModules.push(esImport)
@@ -108,6 +120,14 @@ class Generator {
     }
   }
 
+  pathToComponentName(path) {
+    const name = path.replace('@', '').replace(/\/(.)?/g, (_, $1) => {
+      if (!$1) return ''
+      return $1.toUpperCase()
+    })
+    return name
+  }
+
   entry() {
     const { router, esModules, options } = this.reactRouter()
     const cssEntry = this.cssEntry
@@ -119,7 +139,7 @@ class Generator {
       // @ts-nocheck
       import React from 'react'
       import ReactDOM from 'react-dom'
-      import { BrowserRouter } from 'react-router-dom'
+      import { BrowserRouter, HashRouter, MemoryRouter, withRouter } from 'react-router-dom'
       import { renderRoutes } from 'react-router-config'
       ${esModules.join('\n')}
       ${cssEntry}
@@ -133,9 +153,9 @@ class Generator {
 
       const options = ${options}
 
-      const Root = () => (
+      const Root = () => {
         ${router}
-      )
+      }
 
       renderApp(<Root />)
 
