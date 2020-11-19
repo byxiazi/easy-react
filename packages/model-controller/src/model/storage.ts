@@ -25,6 +25,12 @@ function storageFactory(storage: Storage) {
     removeItem(key: string) {
       storage.removeItem(key)
     },
+    key(n: number) {
+      storage.key(n)
+    },
+    clear() {
+      storage.clear()
+    },
   }
 }
 export const local = storageFactory(localStorage)
