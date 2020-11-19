@@ -1,16 +1,13 @@
-type subscriber = (state: any) => void
+import { Subscribed } from '../index'
+type subscriber = (state: Subscribed) => void
 export type reducer = (oldState: any, payload: any) => any
 
 interface Model {
   namespaces: string[]
   state: {
-    [namespace: string]:
-      | {
-          state: any
-          reducer?: reducer
-        }
-      | undefined
+    [namespace: string]: any
   }
+  reducers: { namespace: string; reducer: reducer }[]
   subs: Array<{
     publishers: string[]
     namespace: string
@@ -28,15 +25,21 @@ interface Model {
 const Model: Model = {
   namespaces: [],
   state: {},
+  reducers: [],
   subs: [],
   register(namespace, initState, reducer) {
     if (!this.namespaces.includes(namespace)) {
       // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
       this.namespaces.push(namespace)
-      this.state[namespace] = {
-        state: undefined,
-        reducer,
-      }
+      this.state[namespace] = undefined
+      this.reducers = this.reducers.filter((item) => {
+        return item.namespace !== namespace
+      })
+      reducer &&
+        this.reducers.push({
+          namespace,
+          reducer,
+        })
       this.dispatch(initState, namespace)
     }
   },
@@ -56,18 +59,25 @@ const Model: Model = {
     })
   },
   dispatch(state, namespace) {
-    const { reducer: r, state: oldState } = this.state[namespace]!
+    const oldState = this.state[namespace]
+    const r = this.reducers.find((item) => {
+      return item.namespace === namespace
+    })
+    // @ts-ignore
+    const { reducer } = r || {}
+
     let newState: any
-    if (typeof r === 'function') {
-      newState = r(oldState, state)
+    if (typeof reducer === 'function') {
+      newState = reducer(oldState, state)
     } else {
       newState = state
     }
-    this.state[namespace]!.state = newState
+    this.state[namespace] = newState
     this.subs.forEach((item) => {
       if (item.publishers.includes(namespace)) {
-        const values = item.publishers.map((item) => {
-          return this.getState(item)
+        const values: Subscribed = {}
+        item.publishers.forEach((item) => {
+          values[item] = this.getState(item)
         })
         item.callback(values)
       }
@@ -75,11 +85,14 @@ const Model: Model = {
     return newState
   },
   getState(namespace) {
-    return this.state[namespace] ? this.state[namespace]!.state : undefined
+    return this.state[namespace] ? this.state[namespace] : undefined
   },
   reset(namespace: string) {
     this.namespaces = this.namespaces.filter((item) => {
       return item !== namespace
+    })
+    this.reducers = this.reducers.filter((item) => {
+      return item.namespace !== namespace
     })
     this.state[namespace] = undefined
   },

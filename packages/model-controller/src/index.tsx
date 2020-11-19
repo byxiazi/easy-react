@@ -20,11 +20,13 @@ export interface ModelConfig {
   reset?: boolean
 }
 
+export type Subscribed = { [key: string]: any }
+
 export interface WrappedComponentProps extends ClassAttributes<any> {
   // [key: string]: any
   dispatch: (state: any) => void
   getState: () => any
-  subscribed: any[] | undefined
+  subscribed: Subscribed
   context: RouteComponentProps
 }
 
@@ -110,15 +112,15 @@ export default function config({
       }
 
       componentDidMount() {
-        let subscribed = []
+        let subscribed: Subscribed = {}
         if (Array.isArray(publishers)) {
           Model.subscribe(namespace, publishers, this.update)
-          subscribed = publishers.map((item) => {
+          publishers.forEach((item) => {
             let state = Model.getState(item)
             if (state === undefined) {
               state = this.getInitState(item)
             }
-            return state
+            subscribed[item] = state
           })
         }
         this.setState({ subscribed })
@@ -159,7 +161,7 @@ export default function config({
         Model.register(ns, state, reducer)
       }
 
-      update = (state: any) => {
+      update = (state: Subscribed) => {
         this.setState({
           subscribed: state,
         })
