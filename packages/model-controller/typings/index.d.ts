@@ -13,10 +13,13 @@ export interface ModelConfig {
     cacheOpts?: CacheOpts;
     reset?: boolean;
 }
+export declare type Subscribed = {
+    [key: string]: any;
+};
 export interface WrappedComponentProps extends ClassAttributes<any> {
     dispatch: (state: any) => void;
     getState: () => any;
-    subscribed: any[] | undefined;
+    subscribed: Subscribed;
     context: RouteComponentProps;
 }
 export interface ControllerProps {
@@ -33,7 +36,7 @@ export default function config({ namespace, publishers, initState, reducer, cach
         clearAbandonCache: () => void;
         getInitState: (ns: string) => any;
         register: (ns: string, state: any) => void;
-        update: (state: any) => void;
+        update: (state: Subscribed) => void;
         getState: (ns?: string | undefined) => any;
         dispatch: (state: any, action?: string | undefined) => void;
         setCache: (state: any) => void;

@@ -1,13 +1,15 @@
-declare type subscriber = (state: any) => void;
+import { Subscribed } from '../index';
+declare type subscriber = (state: Subscribed) => void;
 export declare type reducer = (oldState: any, payload: any) => any;
 interface Model {
     namespaces: string[];
     state: {
-        [namespace: string]: {
-            state: any;
-            reducer?: reducer;
-        } | undefined;
+        [namespace: string]: any;
     };
+    reducers: {
+        namespace: string;
+        reducer: reducer;
+    }[];
     subs: Array<{
         publishers: string[];
         namespace: string;

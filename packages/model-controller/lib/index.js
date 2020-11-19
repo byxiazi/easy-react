@@ -160,15 +160,15 @@ export default function config(_a) {
             }
             Controller.prototype.componentDidMount = function () {
                 var _this = this;
-                var subscribed = [];
+                var subscribed = {};
                 if (Array.isArray(publishers)) {
                     Model.subscribe(namespace, publishers, this.update);
-                    subscribed = publishers.map(function (item) {
+                    publishers.forEach(function (item) {
                         var state = Model.getState(item);
                         if (state === undefined) {
                             state = _this.getInitState(item);
                         }
-                        return state;
+                        subscribed[item] = state;
                     });
                 }
                 this.setState({ subscribed: subscribed });
