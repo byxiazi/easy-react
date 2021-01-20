@@ -2,7 +2,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -27,8 +27,10 @@ var __rest = (this && this.__rest) || function (s, e) {
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
         t[p] = s[p];
     if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
-            t[p[i]] = s[p[i]];
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
     return t;
 };
 import React, { Component } from 'react';
@@ -94,7 +96,6 @@ export default function config(_a) {
                     _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
                     _this.register(namespace, state);
-                    _this.setCache(Model.getState(namespace));
                 };
                 _this.clearAbandonCache = function () {
                     if (cacheOpts) {
@@ -120,7 +121,7 @@ export default function config(_a) {
                     return state;
                 };
                 _this.register = function (ns, state) {
-                    Model.register(ns, state, reducer);
+                    Model.register(ns, state, _this.setCache, reducer);
                 };
                 _this.update = function (state) {
                     _this.setState({
@@ -133,7 +134,8 @@ export default function config(_a) {
                 _this.dispatch = function (state, action) {
                     var n = action || namespace;
                     var newState = Model.dispatch(state, n);
-                    _this.setCache(newState);
+                    // TODO: 缓存应以action的缓存值为准
+                    // this.setCache(newState)
                 };
                 _this.setCache = function (state) {
                     if (cacheOpts) {

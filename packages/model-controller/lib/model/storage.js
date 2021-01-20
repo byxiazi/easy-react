@@ -29,6 +29,12 @@ function storageFactory(storage) {
         removeItem: function (key) {
             storage.removeItem(key);
         },
+        key: function (n) {
+            storage.key(n);
+        },
+        clear: function () {
+            storage.clear();
+        },
     };
 }
 export var local = storageFactory(localStorage);

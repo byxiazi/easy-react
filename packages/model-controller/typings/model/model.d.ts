@@ -1,5 +1,5 @@
 import { Subscribed } from '../index';
-declare type subscriber = (state: Subscribed) => void;
+declare type notifyCb = (state: Subscribed) => void;
 export declare type reducer = (oldState: any, payload: any) => any;
 interface Model {
     namespaces: string[];
@@ -13,10 +13,14 @@ interface Model {
     subs: Array<{
         publishers: string[];
         namespace: string;
-        callback: subscriber;
+        callback: notifyCb;
     }>;
-    register(namespace: string, initState: any, reducer?: reducer): void;
-    subscribe(namespace: string, publishers: string[], callback: subscriber): void;
+    caches: Array<{
+        namespace: string;
+        callback: (state: any) => void;
+    }>;
+    register(namespace: string, initState: any, cacheCb: (state: any) => void, reducer?: reducer): void;
+    subscribe(namespace: string, publishers: string[], callback: notifyCb): void;
     unSubscribe(namespace: string): void;
     dispatch(state: any, action: string): any;
     getState(namespace: string): any;

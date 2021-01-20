@@ -24,7 +24,7 @@ export type Subscribed = { [key: string]: any }
 
 export interface WrappedComponentProps extends ClassAttributes<any> {
   // [key: string]: any
-  dispatch: (state: any) => void
+  dispatch: (state: any, action?: string) => void
   getState: () => any
   subscribed: Subscribed
   context: RouteComponentProps
@@ -130,7 +130,6 @@ export default function config({
         this.clearAbandonCache()
         const state = this.getInitState(namespace)
         this.register(namespace, state)
-        this.setCache(Model.getState(namespace))
       }
 
       clearAbandonCache = () => {
@@ -158,7 +157,7 @@ export default function config({
       }
 
       register = (ns: string, state: any) => {
-        Model.register(ns, state, reducer)
+        Model.register(ns, state, this.setCache, reducer)
       }
 
       update = (state: Subscribed) => {
@@ -174,7 +173,8 @@ export default function config({
       dispatch = (state: any, action?: string) => {
         const n = action || namespace
         const newState = Model.dispatch(state, n)
-        this.setCache(newState)
+        // TODO: 缓存应以action的缓存值为准
+        // this.setCache(newState)
       }
 
       setCache = (state: any) => {

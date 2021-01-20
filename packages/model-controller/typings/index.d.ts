@@ -17,7 +17,7 @@ export declare type Subscribed = {
     [key: string]: any;
 };
 export interface WrappedComponentProps extends ClassAttributes<any> {
-    dispatch: (state: any) => void;
+    dispatch: (state: any, action?: string) => void;
     getState: () => any;
     subscribed: Subscribed;
     context: RouteComponentProps;
@@ -52,6 +52,16 @@ export default function config({ namespace, publishers, initState, reducer, cach
         refs: {
             [key: string]: React.ReactInstance;
         };
+        shouldComponentUpdate?(nextProps: Readonly<ControllerProps>, nextState: Readonly<ControllerState>, nextContext: any): boolean;
+        componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
+        getSnapshotBeforeUpdate?(prevProps: Readonly<ControllerProps>, prevState: Readonly<ControllerState>): any;
+        componentDidUpdate?(prevProps: Readonly<ControllerProps>, prevState: Readonly<ControllerState>, snapshot?: any): void;
+        componentWillMount?(): void;
+        UNSAFE_componentWillMount?(): void;
+        componentWillReceiveProps?(nextProps: Readonly<ControllerProps>, nextContext: any): void;
+        UNSAFE_componentWillReceiveProps?(nextProps: Readonly<ControllerProps>, nextContext: any): void;
+        componentWillUpdate?(nextProps: Readonly<ControllerProps>, nextState: Readonly<ControllerState>, nextContext: any): void;
+        UNSAFE_componentWillUpdate?(nextProps: Readonly<ControllerProps>, nextState: Readonly<ControllerState>, nextContext: any): void;
     };
     contextType?: React.Context<any> | undefined;
 };
