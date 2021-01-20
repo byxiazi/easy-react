@@ -121,10 +121,14 @@ class Generator {
   }
 
   pathToComponentName(path) {
-    const name = path.replace('@', '').replace(/\/(.)?/g, (_, $1) => {
+    let name = path.replace('@', '').replace(/\/(.)?/g, (_, $1) => {
       if (!$1) return ''
       return $1.toUpperCase()
     })
+    name = name.replace(/[^\w]+([\w])?/g, (value, $1) => {
+      if (!$1) return ''
+      return $1.toUpperCase()
+  } )
     return name
   }
 
