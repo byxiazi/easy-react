@@ -1,4 +1,4 @@
-import React, { ClassAttributes } from 'react';
+import React from 'react';
 import { RouteComponentProps } from 'react-router';
 import { reducer } from './model/model';
 export interface CacheOpts {
@@ -16,9 +16,10 @@ export interface ModelConfig {
 export declare type Subscribed = {
     [key: string]: any;
 };
-export interface WrappedComponentProps extends ClassAttributes<any> {
+export interface WrappedComponentProps {
     dispatch: (state: any, action?: string) => void;
-    getState: () => any;
+    getState: (ns?: string) => any;
+    unRegister: (ns?: string) => void;
     subscribed: Subscribed;
     context: RouteComponentProps;
 }
@@ -26,13 +27,14 @@ export interface ControllerProps {
     [key: string]: any;
 }
 interface ControllerState {
+    subscribed: Subscribed;
     [key: string]: any;
 }
 export declare const getState: (ns: string) => any;
-export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): (WrappedComponent: React.ComponentType<WrappedComponentProps>) => {
+export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): <P extends WrappedComponentProps>(WrappedComponent: React.ComponentType<P>) => {
     new (props: ControllerProps): {
-        componentDidMount(): void;
         init: () => void;
+        getInitSubscribed: () => Subscribed;
         clearAbandonCache: () => void;
         getInitState: (ns: string) => any;
         register: (ns: string, state: any) => void;
@@ -40,6 +42,7 @@ export default function config({ namespace, publishers, initState, reducer, cach
         getState: (ns?: string | undefined) => any;
         dispatch: (state: any, action?: string | undefined) => void;
         setCache: (state: any) => void;
+        unRegister: (ns?: string | undefined) => void;
         componentWillUnmount(): void;
         render(): JSX.Element;
         context: any;
@@ -52,6 +55,7 @@ export default function config({ namespace, publishers, initState, reducer, cach
         refs: {
             [key: string]: React.ReactInstance;
         };
+        componentDidMount?(): void;
         shouldComponentUpdate?(nextProps: Readonly<ControllerProps>, nextState: Readonly<ControllerState>, nextContext: any): boolean;
         componentDidCatch?(error: Error, errorInfo: React.ErrorInfo): void;
         getSnapshotBeforeUpdate?(prevProps: Readonly<ControllerProps>, prevState: Readonly<ControllerState>): any;

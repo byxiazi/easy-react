@@ -92,10 +92,38 @@ export default function config(_a) {
             __extends(Controller, _super);
             function Controller(props) {
                 var _this = _super.call(this, props) || this;
+                // componentDidMount() {
+                //   let subscribed: Subscribed = {}
+                //   if (Array.isArray(publishers)) {
+                //     Model.subscribe(namespace, publishers, this.update)
+                //     publishers.forEach((item) => {
+                //       let state = Model.getState(item)
+                //       if (state === undefined) {
+                //         state = this.getInitState(item)
+                //       }
+                //       subscribed[item] = state
+                //     })
+                //   }
+                //   this.setState({ subscribed })
+                // }
                 _this.init = function () {
                     _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
                     _this.register(namespace, state);
+                };
+                _this.getInitSubscribed = function () {
+                    var subscribed = {};
+                    if (Array.isArray(publishers)) {
+                        Model.subscribe(namespace, publishers, _this.update);
+                        publishers.forEach(function (item) {
+                            // let state = Model.getState(item)
+                            // if (state === undefined) {
+                            //   state = this.getInitState(item)
+                            // }
+                            subscribed[item] = getState(item);
+                        });
+                    }
+                    return subscribed;
                 };
                 _this.clearAbandonCache = function () {
                     if (cacheOpts) {
@@ -133,9 +161,7 @@ export default function config(_a) {
                 };
                 _this.dispatch = function (state, action) {
                     var n = action || namespace;
-                    var newState = Model.dispatch(state, n);
-                    // TODO: 缓存应以action的缓存值为准
-                    // this.setCache(newState)
+                    Model.dispatch(state, n);
                 };
                 _this.setCache = function (state) {
                     if (cacheOpts) {
@@ -156,34 +182,27 @@ export default function config(_a) {
                         }
                     }
                 };
-                _this.state = {};
+                _this.unRegister = function (ns) {
+                    Model.unRegister(ns || namespace);
+                };
                 _this.init();
+                var subscribed = _this.getInitSubscribed();
+                _this.state = {
+                    subscribed: subscribed
+                };
                 return _this;
             }
-            Controller.prototype.componentDidMount = function () {
-                var _this = this;
-                var subscribed = {};
-                if (Array.isArray(publishers)) {
-                    Model.subscribe(namespace, publishers, this.update);
-                    publishers.forEach(function (item) {
-                        var state = Model.getState(item);
-                        if (state === undefined) {
-                            state = _this.getInitState(item);
-                        }
-                        subscribed[item] = state;
-                    });
-                }
-                this.setState({ subscribed: subscribed });
-            };
             Controller.prototype.componentWillUnmount = function () {
                 Model.unSubscribe(namespace);
             };
             Controller.prototype.render = function () {
                 var _this = this;
                 var _a = this.props, _ref = _a._ref, restProps = __rest(_a, ["_ref"]);
-                var _b = this.state, subscribed = _b.subscribed, restState = __rest(_b, ["subscribed"]);
+                var subscribed = this.state.subscribed;
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
-                    return (React.createElement(WrappedComponent, __assign({}, restState, { subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, context: context }, restProps, { ref: _ref })));
+                    return (
+                    // @ts-ignore
+                    React.createElement(WrappedComponent, __assign({ subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, unRegister: _this.unRegister, context: context }, restProps, { ref: _ref })));
                 }));
             };
             return Controller;

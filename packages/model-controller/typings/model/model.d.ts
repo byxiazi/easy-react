@@ -22,6 +22,7 @@ interface Model {
     register(namespace: string, initState: any, cacheCb: (state: any) => void, reducer?: reducer): void;
     subscribe(namespace: string, publishers: string[], callback: notifyCb): void;
     unSubscribe(namespace: string): void;
+    unRegister(namespace: string): void;
     dispatch(state: any, action: string): any;
     getState(namespace: string): any;
     reset(namespace: string): void;

@@ -24,6 +24,11 @@ var Model = {
             this.dispatch(initState, namespace);
         }
     },
+    unRegister: function (namespace) {
+        this.namespaces = this.namespaces.filter(function (item) {
+            return item !== namespace;
+        });
+    },
     subscribe: function (namespace, publishers, callback) {
         this.subs = this.subs.filter(function (item) {
             return item.namespace !== namespace;

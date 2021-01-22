@@ -22,12 +22,12 @@ export interface ModelConfig {
 
 export type Subscribed = { [key: string]: any }
 
-export interface WrappedComponentProps extends ClassAttributes<any> {
-  // [key: string]: any
+export interface WrappedComponentProps {
   dispatch: (state: any, action?: string) => void
-  getState: () => any
+  getState: (ns?: string) => any
+  unRegister: (ns?: string) => void
   subscribed: Subscribed
-  context: RouteComponentProps
+  context: RouteComponentProps,
 }
 
 export interface ControllerProps {
@@ -35,6 +35,7 @@ export interface ControllerProps {
 }
 
 interface ControllerState {
+  subscribed: Subscribed
   [key: string]: any
 }
 
@@ -100,36 +101,56 @@ export default function config({
     Model.reset(namespace)
   }
 
-  return (WrappedComponent: React.ComponentType<WrappedComponentProps>) => {
+  return <P extends WrappedComponentProps>(WrappedComponent: React.ComponentType<P>) =>
+   {
     return class Controller extends Component<
       ControllerProps,
       ControllerState
     > {
       constructor(props: ControllerProps) {
         super(props)
-        this.state = {}
+
         this.init()
+        const subscribed = this.getInitSubscribed()
+        this.state = {
+          subscribed
+        }
       }
 
-      componentDidMount() {
-        let subscribed: Subscribed = {}
-        if (Array.isArray(publishers)) {
-          Model.subscribe(namespace, publishers, this.update)
-          publishers.forEach((item) => {
-            let state = Model.getState(item)
-            if (state === undefined) {
-              state = this.getInitState(item)
-            }
-            subscribed[item] = state
-          })
-        }
-        this.setState({ subscribed })
-      }
+      // componentDidMount() {
+      //   let subscribed: Subscribed = {}
+      //   if (Array.isArray(publishers)) {
+      //     Model.subscribe(namespace, publishers, this.update)
+      //     publishers.forEach((item) => {
+      //       let state = Model.getState(item)
+      //       if (state === undefined) {
+      //         state = this.getInitState(item)
+      //       }
+      //       subscribed[item] = state
+      //     })
+      //   }
+      //   this.setState({ subscribed })
+      // }
 
       init = () => {
         this.clearAbandonCache()
         const state = this.getInitState(namespace)
         this.register(namespace, state)
+      }
+
+      getInitSubscribed = () => {
+        let subscribed: Subscribed = {}
+        if (Array.isArray(publishers)) {
+          Model.subscribe(namespace, publishers, this.update)
+          publishers.forEach((item) => {
+            // let state = Model.getState(item)
+            // if (state === undefined) {
+            //   state = this.getInitState(item)
+            // }
+            subscribed[item] = getState(item)
+          })
+        }
+        return subscribed
       }
 
       clearAbandonCache = () => {
@@ -172,9 +193,7 @@ export default function config({
 
       dispatch = (state: any, action?: string) => {
         const n = action || namespace
-        const newState = Model.dispatch(state, n)
-        // TODO: 缓存应以action的缓存值为准
-        // this.setCache(newState)
+        Model.dispatch(state, n)
       }
 
       setCache = (state: any) => {
@@ -198,22 +217,27 @@ export default function config({
         }
       }
 
+      unRegister = (ns?: string) => {
+        Model.unRegister(ns || namespace)
+      }
+
       componentWillUnmount() {
         Model.unSubscribe(namespace)
       }
 
       render() {
         const { _ref, ...restProps } = this.props
-        const { subscribed, ...restState } = this.state
+        const { subscribed } = this.state
         return (
           <RouterContext.Consumer>
             {(context) => {
               return (
+                // @ts-ignore
                 <WrappedComponent
-                  {...restState}
                   subscribed={subscribed}
                   dispatch={this.dispatch}
                   getState={this.getState}
+                  unRegister={this.unRegister}
                   context={context}
                   {...restProps}
                   ref={_ref}

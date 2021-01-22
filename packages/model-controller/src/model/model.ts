@@ -25,7 +25,7 @@ interface Model {
   ): void
   subscribe(namespace: string, publishers: string[], callback: notifyCb): void
   unSubscribe(namespace: string): void
-  // unregister(namespace: string): void
+  unRegister(namespace: string): void
   dispatch(state: any, action: string): any
   getState(namespace: string): any
   reset(namespace: string): void
@@ -56,6 +56,11 @@ const Model: Model = {
         })
       this.dispatch(initState, namespace)
     }
+  },
+  unRegister(namespace: string) {
+    this.namespaces = this.namespaces.filter((item) => {
+      return item !== namespace
+    })
   },
   subscribe(namespace, publishers, callback) {
     this.subs = this.subs.filter((item) => {
