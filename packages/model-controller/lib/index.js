@@ -55,6 +55,10 @@ function _getState(ns) {
             if (!expired || expired >= Date.now()) {
                 state = l.value;
             }
+            else {
+                // 清除缓存
+                local.removeItem(key);
+            }
         }
     }
     catch (error) {
@@ -68,6 +72,9 @@ export var getState = function (ns) {
         state = _getState(ns);
     }
     return state;
+};
+export var dispatch = function (state, namespace) {
+    Model.dispatch(state, namespace);
 };
 export default function config(_a) {
     var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, reset = _a.reset;
@@ -92,20 +99,6 @@ export default function config(_a) {
             __extends(Controller, _super);
             function Controller(props) {
                 var _this = _super.call(this, props) || this;
-                // componentDidMount() {
-                //   let subscribed: Subscribed = {}
-                //   if (Array.isArray(publishers)) {
-                //     Model.subscribe(namespace, publishers, this.update)
-                //     publishers.forEach((item) => {
-                //       let state = Model.getState(item)
-                //       if (state === undefined) {
-                //         state = this.getInitState(item)
-                //       }
-                //       subscribed[item] = state
-                //     })
-                //   }
-                //   this.setState({ subscribed })
-                // }
                 _this.init = function () {
                     _this.clearAbandonCache();
                     var state = _this.getInitState(namespace);
@@ -116,10 +109,6 @@ export default function config(_a) {
                     if (Array.isArray(publishers)) {
                         Model.subscribe(namespace, publishers, _this.update);
                         publishers.forEach(function (item) {
-                            // let state = Model.getState(item)
-                            // if (state === undefined) {
-                            //   state = this.getInitState(item)
-                            // }
                             subscribed[item] = getState(item);
                         });
                     }
@@ -185,6 +174,9 @@ export default function config(_a) {
                 _this.unRegister = function (ns) {
                     Model.unRegister(ns || namespace);
                 };
+                _this.replaceCacheOpts = function (newCacheOpts) {
+                    cacheOpts = __assign(__assign({}, cacheOpts), newCacheOpts);
+                };
                 _this.init();
                 var subscribed = _this.getInitSubscribed();
                 _this.state = {
@@ -202,7 +194,7 @@ export default function config(_a) {
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
                     return (
                     // @ts-ignore
-                    React.createElement(WrappedComponent, __assign({ subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, unRegister: _this.unRegister, context: context }, restProps, { ref: _ref })));
+                    React.createElement(WrappedComponent, __assign({ subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, replaceCacheOpts: _this.replaceCacheOpts, unRegister: _this.unRegister, context: context }, restProps, { ref: _ref })));
                 }));
             };
             return Controller;

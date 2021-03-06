@@ -1,4 +1,4 @@
-import React, { Component, ClassAttributes } from 'react'
+import React, { Component } from 'react'
 import {
   __RouterContext as RouterContext,
   RouteComponentProps,
@@ -25,6 +25,7 @@ export type Subscribed = { [key: string]: any }
 export interface WrappedComponentProps {
   dispatch: (state: any, action?: string) => void
   getState: (ns?: string) => any
+  replaceCacheOpts: (newCacheOpts: CacheOpts) => void
   unRegister: (ns?: string) => void
   subscribed: Subscribed
   context: RouteComponentProps,
@@ -56,6 +57,9 @@ function _getState(ns: string) {
       const expired = l.expired
       if (!expired || expired >= Date.now()) {
         state = l.value
+      } else {
+        // 清除缓存
+        local.removeItem(key)
       }
     }
   } catch (error) {
@@ -71,6 +75,10 @@ export const getState = (ns: string) => {
     state = _getState(ns)
   }
   return state
+}
+
+export const dispatch = (state: any, namespace: string) => {
+  Model.dispatch(state, namespace)
 }
 
 export default function config({
@@ -117,21 +125,6 @@ export default function config({
         }
       }
 
-      // componentDidMount() {
-      //   let subscribed: Subscribed = {}
-      //   if (Array.isArray(publishers)) {
-      //     Model.subscribe(namespace, publishers, this.update)
-      //     publishers.forEach((item) => {
-      //       let state = Model.getState(item)
-      //       if (state === undefined) {
-      //         state = this.getInitState(item)
-      //       }
-      //       subscribed[item] = state
-      //     })
-      //   }
-      //   this.setState({ subscribed })
-      // }
-
       init = () => {
         this.clearAbandonCache()
         const state = this.getInitState(namespace)
@@ -143,10 +136,6 @@ export default function config({
         if (Array.isArray(publishers)) {
           Model.subscribe(namespace, publishers, this.update)
           publishers.forEach((item) => {
-            // let state = Model.getState(item)
-            // if (state === undefined) {
-            //   state = this.getInitState(item)
-            // }
             subscribed[item] = getState(item)
           })
         }
@@ -221,6 +210,13 @@ export default function config({
         Model.unRegister(ns || namespace)
       }
 
+      replaceCacheOpts = (newCacheOpts: CacheOpts) => {
+        cacheOpts = {
+          ...cacheOpts,
+          ...newCacheOpts
+        }
+      }
+
       componentWillUnmount() {
         Model.unSubscribe(namespace)
       }
@@ -237,6 +233,7 @@ export default function config({
                   subscribed={subscribed}
                   dispatch={this.dispatch}
                   getState={this.getState}
+                  replaceCacheOpts={this.replaceCacheOpts}
                   unRegister={this.unRegister}
                   context={context}
                   {...restProps}
