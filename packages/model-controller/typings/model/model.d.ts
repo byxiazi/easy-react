@@ -1,5 +1,6 @@
 import { Subscribed } from '../index';
 declare type notifyCb = (state: Subscribed) => void;
+declare type setCache = (state: any, expired?: number) => void;
 export declare type reducer = (oldState: any, payload: any) => any;
 interface Model {
     namespaces: string[];
@@ -17,13 +18,13 @@ interface Model {
     }>;
     caches: Array<{
         namespace: string;
-        callback: (state: any) => void;
+        callback: setCache;
     }>;
-    register(namespace: string, initState: any, cacheCb: (state: any) => void, reducer?: reducer): void;
+    register(namespace: string, initState: any, setCacheCb: setCache, reducer?: reducer): void;
     subscribe(namespace: string, publishers: string[], callback: notifyCb): void;
     unSubscribe(namespace: string): void;
     unRegister(namespace: string): void;
-    dispatch(state: any, action: string): any;
+    dispatch(state: any, action: string, expired?: number): any;
     getState(namespace: string): any;
     reset(namespace: string): void;
 }

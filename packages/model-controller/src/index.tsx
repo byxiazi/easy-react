@@ -25,7 +25,7 @@ export type Subscribed = { [key: string]: any }
 export interface WrappedComponentProps {
   dispatch: (state: any, action?: string) => void
   getState: (ns?: string) => any
-  replaceCacheOpts: (newCacheOpts: CacheOpts) => void
+  // replaceCacheOpts: (newCacheOpts: CacheOpts) => void
   unRegister: (ns?: string) => void
   subscribed: Subscribed
   context: RouteComponentProps,
@@ -81,6 +81,20 @@ export const dispatch = (state: any, namespace: string) => {
   Model.dispatch(state, namespace)
 }
 
+export function clearLocal(ns: string) {
+  const key = CACHE_PREFIX + ns
+  if (local.getItem(key) != null) {
+    local.removeItem(key)
+  }
+}
+
+export function clearSession(ns: string) {
+  const key = CACHE_PREFIX + ns
+  if (session.getItem(key) != null) {
+    session.removeItem(key)
+  }
+}
+
 export default function config({
   namespace,
   publishers,
@@ -91,21 +105,10 @@ export default function config({
 }: ModelConfig) {
   const cacheKey = CACHE_PREFIX + namespace
 
-  function clearLocal() {
-    if (local.getItem(cacheKey) != null) {
-      local.removeItem(cacheKey)
-    }
-  }
-
-  function clearSession() {
-    if (session.getItem(cacheKey) != null) {
-      session.removeItem(cacheKey)
-    }
-  }
-
   if (reset) {
-    clearLocal()
-    clearSession()
+    // 热更新调试时使用
+    clearLocal(namespace)
+    clearSession(namespace)
     Model.reset(namespace)
   }
 
@@ -146,15 +149,15 @@ export default function config({
         if (cacheOpts) {
           switch (cacheOpts.cache) {
             case 'sessionStorage':
-              clearLocal()
+              clearLocal(namespace)
               break
             case 'localStorage':
-              clearSession()
+              clearSession(namespace)
               break
           }
         } else {
-          clearLocal()
-          clearSession()
+          clearLocal(namespace)
+          clearSession(namespace)
         }
       }
 
@@ -197,23 +200,24 @@ export default function config({
         return getState(ns || namespace)
       }
 
-      dispatch = (state: any, action?: string) => {
+      dispatch = (state: any, action?: string, expired?: number) => {
         const n = action || namespace
-        Model.dispatch(state, n)
+        Model.dispatch(state, n, expired)
       }
 
-      setCache = (state: any) => {
+      setCache = (state: any, expired?: number) => {
         if (cacheOpts) {
           switch (cacheOpts.cache) {
             case 'sessionStorage':
               session.setItem(cacheKey, state)
               break
             case 'localStorage':
-              let expired = this.getExpiredTime(cacheKey)
-
-              if (expired === 0) {
-                if (typeof cacheOpts.expired === 'number') {
-                  expired = Date.now() + cacheOpts.expired
+              if (!expired) {
+                expired = this.getExpiredTime(cacheKey)
+                if (expired === 0) {
+                  if (typeof cacheOpts.expired === 'number') {
+                    expired = Date.now() + cacheOpts.expired
+                  }
                 }
               }
 
@@ -230,12 +234,12 @@ export default function config({
         Model.unRegister(ns || namespace)
       }
 
-      replaceCacheOpts = (newCacheOpts: CacheOpts) => {
-        cacheOpts = {
-          ...cacheOpts,
-          ...newCacheOpts
-        }
-      }
+      // replaceCacheOpts = (newCacheOpts: CacheOpts) => {
+      //   cacheOpts = {
+      //     ...cacheOpts,
+      //     ...newCacheOpts
+      //   }
+      // }
 
       componentWillUnmount() {
         Model.unSubscribe(namespace)
@@ -253,7 +257,7 @@ export default function config({
                   subscribed={subscribed}
                   dispatch={this.dispatch}
                   getState={this.getState}
-                  replaceCacheOpts={this.replaceCacheOpts}
+                  // replaceCacheOpts={this.replaceCacheOpts}
                   unRegister={this.unRegister}
                   context={context}
                   {...restProps}

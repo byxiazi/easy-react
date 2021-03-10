@@ -1,5 +1,6 @@
 import { Subscribed } from '../index'
 type notifyCb = (state: Subscribed) => void
+type setCache = (state: any, expired?: number) => void
 export type reducer = (oldState: any, payload: any) => any
 
 interface Model {
@@ -15,18 +16,18 @@ interface Model {
   }>
   caches: Array<{
     namespace: string
-    callback: (state: any) => void
+    callback: setCache
   }>
   register(
     namespace: string,
     initState: any,
-    cacheCb: (state: any) => void,
+    setCacheCb: setCache,
     reducer?: reducer
   ): void
   subscribe(namespace: string, publishers: string[], callback: notifyCb): void
   unSubscribe(namespace: string): void
   unRegister(namespace: string): void
-  dispatch(state: any, action: string): any
+  dispatch(state: any, action: string, expired?: number): any
   getState(namespace: string): any
   reset(namespace: string): void
 }
@@ -37,7 +38,7 @@ const Model: Model = {
   reducers: [],
   subs: [],
   caches: [],
-  register(namespace, initState, cacheCb, reducer) {
+  register(namespace, initState, setCacheCb, reducer) {
     if (!this.namespaces.includes(namespace)) {
       // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
       this.namespaces.push(namespace)
@@ -47,7 +48,7 @@ const Model: Model = {
       })
       this.caches.push({
         namespace,
-        callback: cacheCb,
+        callback: setCacheCb,
       })
       reducer &&
         this.reducers.push({
@@ -77,7 +78,7 @@ const Model: Model = {
       return item.namespace !== namespace
     })
   },
-  dispatch(state, namespace) {
+  dispatch(state, namespace, expired?: number) {
     const oldState = this.state[namespace]
     const r = this.reducers.find((item) => {
       return item.namespace === namespace
@@ -95,7 +96,7 @@ const Model: Model = {
     // 设置缓存
     this.caches.forEach((item) => {
       if (namespace === item.namespace) {
-        item.callback(newState)
+        item.callback(newState, expired)
       }
     })
     // 通知订阅者更新

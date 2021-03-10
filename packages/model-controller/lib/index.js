@@ -76,22 +76,25 @@ export var getState = function (ns) {
 export var dispatch = function (state, namespace) {
     Model.dispatch(state, namespace);
 };
+export function clearLocal(ns) {
+    var key = CACHE_PREFIX + ns;
+    if (local.getItem(key) != null) {
+        local.removeItem(key);
+    }
+}
+export function clearSession(ns) {
+    var key = CACHE_PREFIX + ns;
+    if (session.getItem(key) != null) {
+        session.removeItem(key);
+    }
+}
 export default function config(_a) {
     var namespace = _a.namespace, publishers = _a.publishers, initState = _a.initState, reducer = _a.reducer, cacheOpts = _a.cacheOpts, reset = _a.reset;
     var cacheKey = CACHE_PREFIX + namespace;
-    function clearLocal() {
-        if (local.getItem(cacheKey) != null) {
-            local.removeItem(cacheKey);
-        }
-    }
-    function clearSession() {
-        if (session.getItem(cacheKey) != null) {
-            session.removeItem(cacheKey);
-        }
-    }
     if (reset) {
-        clearLocal();
-        clearSession();
+        // 热更新调试时使用
+        clearLocal(namespace);
+        clearSession(namespace);
         Model.reset(namespace);
     }
     return function (WrappedComponent) {
@@ -118,16 +121,16 @@ export default function config(_a) {
                     if (cacheOpts) {
                         switch (cacheOpts.cache) {
                             case 'sessionStorage':
-                                clearLocal();
+                                clearLocal(namespace);
                                 break;
                             case 'localStorage':
-                                clearSession();
+                                clearSession(namespace);
                                 break;
                         }
                     }
                     else {
-                        clearLocal();
-                        clearSession();
+                        clearLocal(namespace);
+                        clearSession(namespace);
                     }
                 };
                 _this.getInitState = function (ns) {
@@ -164,21 +167,23 @@ export default function config(_a) {
                 _this.getState = function (ns) {
                     return getState(ns || namespace);
                 };
-                _this.dispatch = function (state, action) {
+                _this.dispatch = function (state, action, expired) {
                     var n = action || namespace;
-                    Model.dispatch(state, n);
+                    Model.dispatch(state, n, expired);
                 };
-                _this.setCache = function (state) {
+                _this.setCache = function (state, expired) {
                     if (cacheOpts) {
                         switch (cacheOpts.cache) {
                             case 'sessionStorage':
                                 session.setItem(cacheKey, state);
                                 break;
                             case 'localStorage':
-                                var expired = _this.getExpiredTime(cacheKey);
-                                if (expired === 0) {
-                                    if (typeof cacheOpts.expired === 'number') {
-                                        expired = Date.now() + cacheOpts.expired;
+                                if (!expired) {
+                                    expired = _this.getExpiredTime(cacheKey);
+                                    if (expired === 0) {
+                                        if (typeof cacheOpts.expired === 'number') {
+                                            expired = Date.now() + cacheOpts.expired;
+                                        }
                                     }
                                 }
                                 local.setItem(cacheKey, {
@@ -192,9 +197,6 @@ export default function config(_a) {
                 _this.unRegister = function (ns) {
                     Model.unRegister(ns || namespace);
                 };
-                _this.replaceCacheOpts = function (newCacheOpts) {
-                    cacheOpts = __assign(__assign({}, cacheOpts), newCacheOpts);
-                };
                 _this.init();
                 var subscribed = _this.getInitSubscribed();
                 _this.state = {
@@ -202,6 +204,12 @@ export default function config(_a) {
                 };
                 return _this;
             }
+            // replaceCacheOpts = (newCacheOpts: CacheOpts) => {
+            //   cacheOpts = {
+            //     ...cacheOpts,
+            //     ...newCacheOpts
+            //   }
+            // }
             Controller.prototype.componentWillUnmount = function () {
                 Model.unSubscribe(namespace);
             };
@@ -212,7 +220,9 @@ export default function config(_a) {
                 return (React.createElement(RouterContext.Consumer, null, function (context) {
                     return (
                     // @ts-ignore
-                    React.createElement(WrappedComponent, __assign({ subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, replaceCacheOpts: _this.replaceCacheOpts, unRegister: _this.unRegister, context: context }, restProps, { ref: _ref })));
+                    React.createElement(WrappedComponent, __assign({ subscribed: subscribed, dispatch: _this.dispatch, getState: _this.getState, 
+                        // replaceCacheOpts={this.replaceCacheOpts}
+                        unRegister: _this.unRegister, context: context }, restProps, { ref: _ref })));
                 }));
             };
             return Controller;

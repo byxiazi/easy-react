@@ -19,7 +19,6 @@ export declare type Subscribed = {
 export interface WrappedComponentProps {
     dispatch: (state: any, action?: string) => void;
     getState: (ns?: string) => any;
-    replaceCacheOpts: (newCacheOpts: CacheOpts) => void;
     unRegister: (ns?: string) => void;
     subscribed: Subscribed;
     context: RouteComponentProps;
@@ -33,6 +32,8 @@ interface ControllerState {
 }
 export declare const getState: (ns: string) => any;
 export declare const dispatch: (state: any, namespace: string) => void;
+export declare function clearLocal(ns: string): void;
+export declare function clearSession(ns: string): void;
 export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): <P extends WrappedComponentProps>(WrappedComponent: React.ComponentType<P>) => {
     new (props: ControllerProps): {
         init: () => void;
@@ -43,10 +44,9 @@ export default function config({ namespace, publishers, initState, reducer, cach
         register: (ns: string, state: any) => void;
         update: (state: Subscribed) => void;
         getState: (ns?: string | undefined) => any;
-        dispatch: (state: any, action?: string | undefined) => void;
-        setCache: (state: any) => void;
+        dispatch: (state: any, action?: string | undefined, expired?: number | undefined) => void;
+        setCache: (state: any, expired?: number | undefined) => void;
         unRegister: (ns?: string | undefined) => void;
-        replaceCacheOpts: (newCacheOpts: CacheOpts) => void;
         componentWillUnmount(): void;
         render(): JSX.Element;
         context: any;

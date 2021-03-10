@@ -4,7 +4,7 @@ var Model = {
     reducers: [],
     subs: [],
     caches: [],
-    register: function (namespace, initState, cacheCb, reducer) {
+    register: function (namespace, initState, setCacheCb, reducer) {
         if (!this.namespaces.includes(namespace)) {
             // throw new Error(`[${namespace}]: Cannot register the same namespace！`)
             this.namespaces.push(namespace);
@@ -14,7 +14,7 @@ var Model = {
             });
             this.caches.push({
                 namespace: namespace,
-                callback: cacheCb,
+                callback: setCacheCb,
             });
             reducer &&
                 this.reducers.push({
@@ -44,7 +44,7 @@ var Model = {
             return item.namespace !== namespace;
         });
     },
-    dispatch: function (state, namespace) {
+    dispatch: function (state, namespace, expired) {
         var _this = this;
         var oldState = this.state[namespace];
         var r = this.reducers.find(function (item) {
@@ -63,7 +63,7 @@ var Model = {
         // 设置缓存
         this.caches.forEach(function (item) {
             if (namespace === item.namespace) {
-                item.callback(newState);
+                item.callback(newState, expired);
             }
         });
         // 通知订阅者更新
