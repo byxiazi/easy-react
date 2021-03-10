@@ -39,6 +39,7 @@ export default function config({ namespace, publishers, initState, reducer, cach
         getInitSubscribed: () => Subscribed;
         clearAbandonCache: () => void;
         getInitState: (ns: string) => any;
+        getExpiredTime: (key: string) => number;
         register: (ns: string, state: any) => void;
         update: (state: Subscribed) => void;
         getState: (ns?: string | undefined) => any;

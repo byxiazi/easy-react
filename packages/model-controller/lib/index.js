@@ -137,6 +137,22 @@ export default function config(_a) {
                     }
                     return state;
                 };
+                _this.getExpiredTime = function (key) {
+                    var expired = 0;
+                    try {
+                        var l = local.getItem(key);
+                        if (l) {
+                            var temp = l.expired;
+                            if (typeof temp === 'number' && temp >= Date.now()) {
+                                expired = temp;
+                            }
+                        }
+                    }
+                    catch (error) {
+                        //
+                    }
+                    return expired;
+                };
                 _this.register = function (ns, state) {
                     Model.register(ns, state, _this.setCache, reducer);
                 };
@@ -159,9 +175,11 @@ export default function config(_a) {
                                 session.setItem(cacheKey, state);
                                 break;
                             case 'localStorage':
-                                var expired = 0;
-                                if (typeof cacheOpts.expired === 'number') {
-                                    expired = Date.now() + cacheOpts.expired;
+                                var expired = _this.getExpiredTime(cacheKey);
+                                if (expired === 0) {
+                                    if (typeof cacheOpts.expired === 'number') {
+                                        expired = Date.now() + cacheOpts.expired;
+                                    }
                                 }
                                 local.setItem(cacheKey, {
                                     value: state,
