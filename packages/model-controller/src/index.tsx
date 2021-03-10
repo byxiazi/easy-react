@@ -23,7 +23,7 @@ export interface ModelConfig {
 export type Subscribed = { [key: string]: any }
 
 export interface WrappedComponentProps {
-  dispatch: (state: any, action?: string) => void
+  dispatch: (state: any, action?: string, expired?: number) => void
   getState: (ns?: string) => any
   // replaceCacheOpts: (newCacheOpts: CacheOpts) => void
   unRegister: (ns?: string) => void
@@ -77,8 +77,8 @@ export const getState = (ns: string) => {
   return state
 }
 
-export const dispatch = (state: any, namespace: string) => {
-  Model.dispatch(state, namespace)
+export const dispatch = (state: any, namespace: string, expired?: number) => {
+  Model.dispatch(state, namespace, expired)
 }
 
 export function clearLocal(ns: string) {
@@ -219,6 +219,8 @@ export default function config({
                     expired = Date.now() + cacheOpts.expired
                   }
                 }
+              } else {
+                expired = Date.now() + expired
               }
 
               local.setItem(cacheKey, {

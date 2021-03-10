@@ -73,8 +73,8 @@ export var getState = function (ns) {
     }
     return state;
 };
-export var dispatch = function (state, namespace) {
-    Model.dispatch(state, namespace);
+export var dispatch = function (state, namespace, expired) {
+    Model.dispatch(state, namespace, expired);
 };
 export function clearLocal(ns) {
     var key = CACHE_PREFIX + ns;
@@ -185,6 +185,9 @@ export default function config(_a) {
                                             expired = Date.now() + cacheOpts.expired;
                                         }
                                     }
+                                }
+                                else {
+                                    expired = Date.now() + expired;
                                 }
                                 local.setItem(cacheKey, {
                                     value: state,

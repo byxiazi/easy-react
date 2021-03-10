@@ -17,7 +17,7 @@ export declare type Subscribed = {
     [key: string]: any;
 };
 export interface WrappedComponentProps {
-    dispatch: (state: any, action?: string) => void;
+    dispatch: (state: any, action?: string, expired?: number) => void;
     getState: (ns?: string) => any;
     unRegister: (ns?: string) => void;
     subscribed: Subscribed;
@@ -31,7 +31,7 @@ interface ControllerState {
     [key: string]: any;
 }
 export declare const getState: (ns: string) => any;
-export declare const dispatch: (state: any, namespace: string) => void;
+export declare const dispatch: (state: any, namespace: string, expired?: number | undefined) => void;
 export declare function clearLocal(ns: string): void;
 export declare function clearSession(ns: string): void;
 export default function config({ namespace, publishers, initState, reducer, cacheOpts, reset, }: ModelConfig): <P extends WrappedComponentProps>(WrappedComponent: React.ComponentType<P>) => {
