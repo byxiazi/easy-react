@@ -166,6 +166,23 @@ export default function config({
         return state
       }
 
+      getExpiredTime = (key: string) => {
+        let expired = 0
+        try {
+          const l = local.getItem(key)
+          if (l) {
+            const temp = l.expired
+            if (typeof temp === 'number' && temp >= Date.now()) {
+              expired = temp
+            }
+          }
+        } catch (error) {
+          //
+        }
+
+        return expired
+      }
+
       register = (ns: string, state: any) => {
         Model.register(ns, state, this.setCache, reducer)
       }
@@ -192,9 +209,12 @@ export default function config({
               session.setItem(cacheKey, state)
               break
             case 'localStorage':
-              let expired = 0
-              if (typeof cacheOpts.expired === 'number') {
-                expired = Date.now() + cacheOpts.expired
+              let expired = this.getExpiredTime(cacheKey)
+
+              if (expired === 0) {
+                if (typeof cacheOpts.expired === 'number') {
+                  expired = Date.now() + cacheOpts.expired
+                }
               }
 
               local.setItem(cacheKey, {
